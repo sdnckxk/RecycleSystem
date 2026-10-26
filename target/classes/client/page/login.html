@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>废旧物品回收管理系统</title>
+    <link rel="stylesheet" href="../static/modules/elementui/theme/index.css">
+    <link rel="stylesheet" href="../static/modules/animate.min.css">
+    <script src="../static/modules/wow.min.js"></script>
+    <link rel="stylesheet" href="../static/css/app.css">
+    <link rel="stylesheet" href="../static/css/index.css">
+    <script src="../static/modules/vue.min.js"></script>
+    <script src="../static/modules/elementui/index.js"></script>
+    <script src="../static/iconfont/iconfont.js"></script>
+</head>
+<body>
+<el-container id="page" v-cloak>
+    <el-main id="main">
+        <div class="login-wrapper">
+            <!-- 环保主题头部 -->
+            <div class="login-header">
+                <div class="eco-icon">♻️</div>
+            <div class="form-name">废旧物品回收管理系统</div>
+                <div class="form-subtitle">绿色回收 · 环保生活</div>
+            </div>
+            
+            <!-- 登录表单 -->
+            <div class="login-form-container">
+                <el-form ref="form" :rules="rules" class="login-form" :model="form" size="small">
+                    <el-form-item prop="username" class="form-item-modern">
+                        <div class="input-wrapper">
+                            <div class="input-icon">
+                                <iconfont icon="el-icon-user"></iconfont>
+                            </div>
+                            <el-input 
+                                v-model="form.username" 
+                                placeholder="请输入账号"
+                                class="modern-input">
+                            </el-input>
+                        </div>
+                </el-form-item>
+                    
+                    <el-form-item prop="password" class="form-item-modern">
+                        <div class="input-wrapper">
+                            <div class="input-icon">
+                                <iconfont icon="el-icon-lock"></iconfont>
+                            </div>
+                            <el-input 
+                                v-model="form.password" 
+                                type="password"
+                                placeholder="请输入密码"
+                                class="modern-input">
+                            </el-input>
+                        </div>
+                </el-form-item>
+                    
+                    <el-form-item prop="code" class="form-item-modern">
+                        <div class="code-row-modern">
+                            <div class="input-wrapper code-input-wrapper">
+                                <div class="input-icon">
+                                    <iconfont icon="el-icon-folder-checked"></iconfont>
+                                </div>
+                                <el-input 
+                                    v-model="form.code" 
+                                    placeholder="请输入验证码"
+                                    class="modern-input">
+                                </el-input>
+                            </div>
+                            <div class="verif-code-modern" @click="getRandCode(4)" :style="{'background-color':codes_bg}">
+                            <span :style="{color:item.color,transform:item.rotate,fontSize:item.size,padding: '0 3px',display:'inline-block'}"
+                                  v-for="(item, index) in codes" :key="index">{{ item.num }}</span>
+                        </div>
+                    </div>
+                </el-form-item>
+                    
+                    <el-form-item label=" " class="remember-modern">
+                        <div class="remember-forget-row">
+                            <el-checkbox v-model="remember" class="eco-checkbox">记住密码</el-checkbox>
+                            <el-button type="text" class="forget-password-btn" @click="toForgetPassword">
+                                忘记密码？
+                            </el-button>
+                        </div>
+                </el-form-item>
+                    
+                    <el-form-item v-if="roleList && roleList.length>1" class="form-item-modern roles" prop="role">
+                        <div class="input-wrapper">
+                            <div class="input-icon">
+                                <iconfont icon="el-icon-user-solid"></iconfont>
+                            </div>
+                            <el-select v-model="form.role" placeholder="请选择用户类型" class="modern-select">
+                        <el-option
+                                v-for="item in roleList"
+                                :key="item.roleName"
+                                :label="item.roleName"
+                                :value="item.roleName">
+                        </el-option>
+                    </el-select>
+                        </div>
+                </el-form-item>
+            </el-form>
+                
+                <!-- 按钮区域 -->
+                <div class="btns-modern">
+                    <el-button type="primary" class="login-btn-modern" @click="login">
+                        <span>登录</span>
+                        <iconfont icon="el-icon-right" style="margin-left: 8px;"></iconfont>
+                    </el-button>
+                    <div class="register-link">
+                        <span>还没有账号？</span>
+                        <el-button type="text" class="register-btn-modern"
+                               @click="location.href='../page/yonghu/register.html'">
+                            立即注册
+                    </el-button>
+                </div>
+                </div>
+            </div>
+        </div>
+    </el-main>
+</el-container>
+</body>
+<script src="../static/modules/axios.min.js"></script>
+<script src="../utils/http.js"></script>
+<script src="../utils/system.js"></script>
+<script src="../utils/global_mixin.js"></script>
+<script src="../utils/toolUtil.js"></script>
+
+<script src="../components/page-header.js"></script>
+<script>
+var vm = new Vue({
+    el: '#page',
+    data() {
+        const checkCode = (rule, value, callback)=>{
+            if (!value) {
+                return callback(new Error('请输入验证码'));
+            }
+            let trueCode = this.codes.map(item=>(item.num)).join('')
+            if(new RegExp(trueCode,'i').test(this.form.code)){
+                callback()
+            }
+            else{
+                callback(new Error('验证码错误'));
+            }
+        }
+        return {
+            remember:false,
+            roles: [],
+            form: {
+                username: '',
+                password: '',
+                role: '',
+            },
+            rules: {
+                username: [
+                    {required: true, message: '请输入用户名', trigger: 'blur'},
+                ],
+                password: [
+                    {required: true, message: '请输入密码', trigger: 'blur'}
+                ],
+                role: [
+                    { required: true, message: '请选择用户类型', trigger: 'change' }
+                ],
+                code:[
+                    {required:true, validator:checkCode, trigger: 'blur'}
+                ]
+            },
+            menus: [],
+            roleList: [],
+            codes:[{
+                num: 1,
+                color: '#000',
+                rotate: '10deg',
+                size: '16px'
+            }, {
+                num: 2,
+                color: '#000',
+                rotate: '10deg',
+                size: '16px'
+            }, {
+                num: 3,
+                color: '#000',
+                rotate: '10deg',
+                size: '16px'
+            }, {
+                num: 4,
+                color: '#000',
+                rotate: '10deg',
+                size: '16px'
+            }],
+            codes_bg:"rgba(256,256,256,1)",
+        }
+    },
+    watch: {
+        showType(n){
+            if(!n){
+                this.stopNavigator()
+            }
+        }
+    },
+    computed: {
+        roleIndex() {
+            return this.roleList.findIndex(item => {
+                return item.roleName == this.form.role
+            })
+        }
+    },
+    created() {
+        const rememberStr = localStorage.getItem('sys_front_remember')
+        if(rememberStr){
+            try {
+                this.remember = true
+                const passArr = decodeURIComponent(atob(rememberStr)).split(',')
+                this.form.username = passArr[0]
+                this.form.password = passArr[1]
+            }catch (e){
+                console.log(e)
+            }
+        }
+        this.init()
+    },
+    methods: {
+        getRandCode(len = 4){
+            this.randomString(len)
+            this.codes_bg = this.randomColor(0.3)
+        },
+        randomString(len = 4){
+            let chars = [
+                "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k",
+                "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v",
+                "w", "x", "y", "z", "A", "B", "C", "D", "E", "F", "G",
+                "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R",
+                "S", "T", "U", "V", "W", "X", "Y", "Z", "0", "1", "2",
+                "3", "4", "5", "6", "7", "8", "9"
+            ]
+            let sizes = ['14', '15', '16', '17', '18']
+
+            // let output = [];
+            for (let i = 0; i < len; i++) {
+                // 随机验证码
+                let key = Math.floor(Math.random() * chars.length)
+                this.codes[i].num = chars[key]
+                this.codes[i].color = this.randomColor()
+                // 随机验证码方向
+                let rotate = Math.floor(Math.random() * 60)
+                let plus = Math.floor(Math.random() * 2)
+                if (plus == 1) rotate = '-' + rotate
+                this.codes[i].rotate = 'rotate(' + rotate + 'deg)'
+                // 随机验证码字体大小
+                let size = Math.floor(Math.random() * sizes.length)
+                this.codes[i].size = sizes[size] + 'px'
+            }
+        },
+        randomColor(A=1){
+            const r = Math.floor(Math.random()*256);
+            const g = Math.floor(Math.random()*256);
+            const b = Math.floor(Math.random()*256);
+            return `rgba(${r},${g},${b},${A})`;
+        },
+        init(){
+            this.getMenu()
+            this.getRandCode()
+        },
+        getMenu() {
+            http.get('menu/list', {
+                params: {
+                    page: 1,
+                    limit: 1,
+                    sort: 'id',
+                }
+            }).then(res => {
+                let menus = JSON.parse(res.data.data.list[0].menujson)
+                this.roleList = menus.filter(item => {
+                    return item.hasFrontLogin == "是"
+                })
+                if(this.roleList.length==1){
+                    this.form.role = this.roleList[0].roleName
+                }
+            })
+        },
+        async login() {
+            this.$refs["form"].validate(async (valid) => {
+                if (!valid) return false
+                const data = {
+                    username: this.form.username,
+                    password: this.form.password,
+                    chk: this.form.role
+                }
+                const config = {
+                    headers: {
+                        "Content-Type": "multipart/form-data"   //以form表单形式提交
+                    }
+                }
+                try {
+                    let res = await http.get(`${this.roleList[this.roleIndex].tableName}/login`, {
+                        params:data
+                    }, config)
+                    this.onLoginSuccess(res.data.token)
+                } catch (e) {
+                    this.getRandCode()
+                }
+
+            })
+        },
+        onLoginSuccess(token) {
+            this.$message.success("登录成功")
+            if(this.remember){
+                localStorage.setItem('sys_front_remember',btoa(encodeURIComponent(`${this.form.username},${this.form.password}`)))
+            }else{
+                localStorage.removeItem('sys_front_remember')
+            }
+            toolUtil.storageSet('sessionTable', this.roleList[this.roleIndex].tableName);
+            toolUtil.storageSet('username', this.form.username);
+            toolUtil.storageSet('Token', token);
+            toolUtil.storageSet('role', this.form.role);
+            toolUtil.storageSet('menuList', JSON.stringify(this.roleList[this.roleIndex].backMenu))
+            http.get(`${this.roleList[this.roleIndex].tableName}/session`).then(res => {
+                toolUtil.storageSet('userInfo', JSON.stringify(res.data.data));
+                toolUtil.storageSet('userid', res.data.data.id)
+                setTimeout(() => {
+                    let redirect = toolUtil.getUrlParamsByKey("redirect")
+                    let func = toolUtil.getUrlParamsByKey("func")
+                    if(func){
+                        return eval(encodeURIComponent(func))
+                    }
+                    if(redirect){
+                        location.replace(decodeURIComponent(redirect))
+                    }else{
+                        location.replace('../page/index.html')
+                    }
+                }, 1000)
+            })
+        },
+        toForgetPassword() {
+            // 跳转到忘记密码页面
+            location.href = '../page/forget.html'
+        },
+    }
+})
+</script>
+<script>
+//须先设置css盒子的animation-duration
+
+new WOW({
+    //boxClass: 'search-box', //目标dom的class
+    //animateClass: 'animate__fadeInDown', //动画名
+}).init()
+
+
+</script>
+<style>
+/* 环保主题配色 */
+:root {
+    --eco-primary: #4CAF50;
+    --eco-primary-dark: #2E7D32;
+    --eco-primary-light: #66BB6A;
+    --eco-secondary: #81C784;
+    --eco-bg: #F1F8F4;
+    --eco-text: #2E7D32;
+    --eco-border: #C8E6C9;
+    --eco-shadow: rgba(76, 175, 80, 0.15);
+}
+
+#page {
+    margin: 0;
+    padding: 0;
+}
+
+/* 主背景 */
+#main {
+    background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 50%, #A5D6A7 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 背景装饰元素 */
+#main::before {
+    content: '';
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    background: 
+        radial-gradient(circle at 20% 30%, rgba(76, 175, 80, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(46, 125, 50, 0.1) 0%, transparent 50%);
+    animation: float 20s ease-in-out infinite;
+    z-index: 0;
+}
+
+@keyframes float {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    50% { transform: translate(-50px, -50px) rotate(180deg); }
+}
+
+/* 登录容器 */
+.login-wrapper {
+    background: #fff;
+    box-sizing: border-box;
+    padding: 0;
+    width: 480px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(46, 125, 50, 0.2);
+    z-index: 1;
+    overflow: hidden;
+    animation: slideInUp 0.6s ease-out;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 登录头部 */
+.login-header {
+    background: linear-gradient(135deg, var(--eco-primary) 0%, var(--eco-primary-dark) 100%);
+    padding: 40px 30px 30px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.login-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="80" r="2" fill="rgba(255,255,255,0.1)"/></svg>');
+    opacity: 0.3;
+}
+
+.eco-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+    animation: rotate 3s linear infinite;
+    position: relative;
+    z-index: 1;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.login-wrapper .form-name {
+    padding: 0;
+    margin: 0 0 8px 0;
+    color: #fff;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.4;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+.form-subtitle {
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 14px;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+}
+
+/* 表单容器 */
+.login-form-container {
+    padding: 40px 40px 30px;
+    background: #fff;
+}
+
+.login-form {
+    padding: 0;
+    background: transparent;
+}
+
+
+/* 表单项样式 */
+.login-form .el-form-item {
+    margin-bottom: 0 !important;
+    padding-bottom: 24px !important;
+}
+
+.form-item-modern {
+    margin-bottom: 0;
+}
+
+/* 输入框容器 */
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    border: 2px solid var(--eco-border);
+    border-radius: 12px;
+    padding: 0 15px;
+    transition: all 0.3s ease;
+    background: #fff;
+}
+
+.input-wrapper:hover {
+    border-color: var(--eco-primary-light);
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+.input-wrapper:focus-within {
+    border-color: var(--eco-primary);
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.15);
+}
+
+.input-icon {
+    color: var(--eco-primary);
+    font-size: 18px;
+    margin-right: 12px;
+    display: flex;
+    align-items: center;
+}
+
+.modern-input {
+    flex: 1;
+}
+
+.modern-input .el-input__inner {
+    border: none !important;
+    padding: 12px 0;
+    font-size: 15px;
+    background: transparent;
+    height: auto;
+    line-height: 1.5;
+}
+
+.modern-input .el-input__inner:focus {
+    border: none !important;
+    box-shadow: none;
+}
+
+.modern-input .el-input__inner::placeholder {
+    color: #bbb;
+}
+
+
+/* 验证码行 */
+.code-row-modern {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+}
+
+.code-input-wrapper {
+    flex: 1;
+}
+
+.verif-code-modern {
+    width: 120px;
+    height: 48px;
+    text-align: center;
+    line-height: 48px;
+    border: 2px solid var(--eco-border);
+    border-radius: 12px;
+    white-space: nowrap;
+    user-select: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: var(--eco-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.verif-code-modern:hover {
+    border-color: var(--eco-primary);
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+/* 选择框样式 */
+.modern-select {
+    flex: 1;
+}
+
+.modern-select .el-input__inner {
+    border: none !important;
+    padding: 12px 0;
+    font-size: 15px;
+    background: transparent;
+    height: auto;
+    line-height: 1.5;
+}
+
+.modern-select .el-input__inner:focus {
+    border: none !important;
+    box-shadow: none;
+}
+
+.el-select-dropdown {
+    min-width: auto !important;
+    border-radius: 12px;
+    border: 1px solid var(--eco-border);
+}
+
+.el-select-dropdown__item.hover,
+.el-select-dropdown__item:hover {
+    background: var(--eco-bg);
+    color: var(--eco-primary-dark);
+}
+
+.el-select-dropdown__item.selected {
+    color: var(--eco-primary);
+    font-weight: 600;
+    background: var(--eco-bg);
+}
+
+.el-select .el-input.is-focus .el-input__inner {
+    border-color: var(--eco-primary);
+}
+
+
+
+/* 记住密码和忘记密码行 */
+.remember-modern {
+    margin-bottom: 0 !important;
+    padding-bottom: 20px !important;
+}
+
+.remember-forget-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.eco-checkbox .el-checkbox__label {
+    color: #666;
+    font-size: 14px;
+}
+
+.eco-checkbox .el-checkbox__input.is-checked .el-checkbox__inner {
+    background-color: var(--eco-primary);
+    border-color: var(--eco-primary);
+}
+
+.eco-checkbox .el-checkbox__input.is-checked + .el-checkbox__label {
+    color: var(--eco-primary-dark);
+}
+
+/* 忘记密码按钮 */
+.forget-password-btn {
+    color: var(--eco-primary) !important;
+    font-size: 14px !important;
+    padding: 0 !important;
+    height: auto !important;
+    line-height: 1.5 !important;
+    border: none !important;
+    background: none !important;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.forget-password-btn:hover {
+    color: var(--eco-primary-dark) !important;
+    text-decoration: underline;
+}
+
+/* 按钮区域 */
+.btns-modern {
+    width: 100%;
+    background: transparent;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: stretch;
+}
+
+.login-btn-modern {
+    width: 100%;
+    height: 50px;
+    line-height: 50px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    background: linear-gradient(135deg, var(--eco-primary) 0%, var(--eco-primary-dark) 100%);
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+}
+
+.login-btn-modern:hover {
+    background: linear-gradient(135deg, var(--eco-primary-dark) 0%, var(--eco-primary) 100%);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+    transform: translateY(-2px);
+}
+
+.login-btn-modern:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(76, 175, 80, 0.3);
+}
+
+.login-btn-modern span {
+    display: flex;
+    align-items: center;
+}
+
+/* 注册链接 */
+.register-link {
+    text-align: center;
+    font-size: 14px;
+    color: #999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+ }
+
+.register-btn-modern {
+    color: var(--eco-primary) !important;
+    font-weight: 600;
+    padding: 0 !important;
+    height: auto !important;
+    line-height: 1.5 !important;
+    border: none !important;
+    background: none !important;
+}
+
+.register-btn-modern:hover {
+    color: var(--eco-primary-dark) !important;
+    text-decoration: underline;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .login-wrapper {
+        width: 90%;
+        max-width: 480px;
+        margin: 20px;
+    }
+    
+    .login-form-container {
+        padding: 30px 25px 25px;
+    }
+    
+    .login-header {
+        padding: 30px 20px 25px;
+    }
+    
+    .eco-icon {
+        font-size: 40px;
+    }
+    
+    .login-wrapper .form-name {
+        font-size: 20px;
+}
+}
+
+/* 加载动画 */
+.login-wrapper {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+</style>
+</html>

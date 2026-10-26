@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>注册</title>
+    <link rel="stylesheet" href="../../static/modules/elementui/theme/index.css">
+    <link rel="stylesheet" href="../../static/css/app.css">
+    <link rel="stylesheet" href="../../static/modules/animate.min.css">
+    <script src="../../static/modules/wow.min.js"></script>
+    <script src="../../static/modules/vue.min.js"></script>
+    <script src="../../static/modules/elementui/index.js"></script>
+    <script src="../../static/iconfont/iconfont.js"></script>
+</head>
+<body>
+<div id="page" v-cloak>
+    <div class="register-wrapper">
+        <!-- 环保主题头部 -->
+        <div class="register-header">
+            <div class="eco-icon">👷</div>
+            <div class="form-name">回收人员注册</div>
+            <div class="form-subtitle">加入回收团队，共建绿色家园</div>
+        </div>
+        
+        <!-- 注册表单 -->
+        <div class="register-form-container">
+            <el-form ref="registerForm" :model="registerForm" :rules="rules" class="register-form">
+                <!-- 人员账号 -->
+                <el-form-item prop="renyuanzhanghao" class="form-item-modern">
+                    <div class="input-wrapper">
+                        <div class="input-icon">
+                            <iconfont icon="el-icon-user"></iconfont>
+                        </div>
+                        <el-input 
+                            v-model="registerForm.renyuanzhanghao"
+                            placeholder="请输入人员账号（3-20位）"
+                            class="modern-input">
+                        </el-input>
+                    </div>
+                </el-form-item>
+                
+                <!-- 密码 -->
+                <el-form-item prop="mima" class="form-item-modern">
+                    <div class="input-wrapper">
+                        <div class="input-icon">
+                            <iconfont icon="el-icon-lock"></iconfont>
+                        </div>
+                        <el-input 
+                            v-model="registerForm.mima" 
+                            type="password" 
+                            placeholder="请输入密码（6-20位）"
+                            show-password
+                            autocomplete="new-password"
+                            class="modern-input">
+                        </el-input>
+                    </div>
+                </el-form-item>
+                
+                <!-- 确认密码 -->
+                <el-form-item prop="mima2" class="form-item-modern">
+                    <div class="input-wrapper">
+                        <div class="input-icon">
+                            <iconfont icon="el-icon-lock"></iconfont>
+                        </div>
+                        <el-input 
+                            v-model="registerForm.mima2" 
+                            type="password" 
+                            placeholder="请再次输入密码"
+                            show-password
+                            autocomplete="new-password"
+                            class="modern-input">
+                        </el-input>
+                    </div>
+            </el-form-item>
+                
+                <!-- 人员姓名 -->
+                <el-form-item prop="renyuanxingming" class="form-item-modern">
+                    <div class="input-wrapper">
+                        <div class="input-icon">
+                            <iconfont icon="el-icon-user-solid"></iconfont>
+                        </div>
+                        <el-input 
+                            v-model="registerForm.renyuanxingming"
+                            placeholder="请输入真实姓名"
+                            class="modern-input">
+                        </el-input>
+                    </div>
+            </el-form-item>
+                
+                <!-- 手机号码 -->
+                <el-form-item prop="shoujihaoma" class="form-item-modern">
+                    <div class="input-wrapper">
+                        <div class="input-icon">
+                            <iconfont icon="el-icon-phone"></iconfont>
+                        </div>
+                        <el-input 
+                            v-model="registerForm.shoujihaoma"
+                            placeholder="请输入手机号码"
+                            maxlength="11"
+                            class="modern-input">
+                        </el-input>
+                    </div>
+            </el-form-item>
+                
+                <!-- 性别 -->
+                <el-form-item prop="xingbie" class="form-item-modern">
+                    <div class="input-wrapper">
+                        <div class="input-icon">
+                            <iconfont icon="el-icon-user"></iconfont>
+                        </div>
+                        <el-select
+                            v-model="registerForm.xingbie"
+                            placeholder="请选择性别"
+                            class="modern-select">
+                            <el-option v-for="item in huishourenyuanxingbieLists" :key="item" :label="item" :value="item"></el-option>
+                        </el-select>
+                    </div>
+            </el-form-item>
+                
+                <!-- 头像上传 -->
+                <el-form-item label="头像" class="form-item-modern upload-item">
+                    <div class="upload-wrapper">
+                <file-upload
+                        tip="点击上传头像"
+                        action="file/upload"
+                            :limit="1"
+                            :multiple="false"
+                        :file-urls="registerForm.touxiang?registerForm.touxiang:''"
+                        @change="touxiangUploadSuccess"
+                ></file-upload>
+                    </div>
+            </el-form-item>
+        </el-form>
+            
+            <!-- 按钮区域 -->
+            <div class="btn-row-modern">
+                <el-button 
+                    type="primary" 
+                    class="register-btn-modern" 
+                    @click="handleRegister"
+                    :loading="loading">
+                    <span>立即注册</span>
+                </el-button>
+                <div class="login-link">
+                    <span>已有账号？</span>
+                    <el-button type="text" class="login-btn-link" @click="toLogin">
+                        立即登录
+                    </el-button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script src='../../static/modules/axios.min.js'></script>
+<script src="../../utils/http.js"></script>
+<script src="../../utils/toolUtil.js"></script>
+<script src="../../utils/global_mixin.js"></script>
+<script src="../../components/FileUpload.js"></script>
+<script>
+    var vm = new Vue({
+        el: '#page',
+        data(){
+            return {
+                loading: false,
+                registerForm:{
+                    renyuanzhanghao: '',
+                    mima: '',
+                    mima2: '',
+                    renyuanxingming: '',
+                    shoujihaoma: '',
+                    xingbie: '',
+                    touxiang: ''
+                },
+                huishourenyuanxingbieLists:[],
+                rules: {}
+            }
+        },
+        created(){
+            this.init()
+            this.setupRules()
+        },
+        methods: {
+            init(){
+                    this.huishourenyuanxingbieLists = "男,女".split(',')
+            },
+            setupRules() {
+                this.rules = {
+                    renyuanzhanghao: [
+                        { required: true, message: '请输入人员账号', trigger: 'blur' },
+                        { min: 3, max: 20, message: '账号长度为3-20位', trigger: 'blur' }
+                    ],
+                    mima: [
+                        { required: true, message: '请输入密码', trigger: 'blur' },
+                        { min: 6, max: 20, message: '密码长度为6-20位', trigger: 'blur' }
+                    ],
+                    mima2: [
+                        { required: true, message: '请再次输入密码', trigger: 'blur' },
+                        { validator: this.validatePassword2, trigger: 'blur' }
+                    ],
+                    renyuanxingming: [
+                        { required: true, message: '请输入人员姓名', trigger: 'blur' }
+                    ],
+                    shoujihaoma: [
+                        { validator: this.validatePhone, trigger: 'blur' }
+                    ],
+                    xingbie: [
+                        { required: true, message: '请选择性别', trigger: 'change' }
+                    ]
+                }
+            },
+            validatePassword2(rule, value, callback) {
+                if (!value) {
+                    callback(new Error('请再次输入密码'));
+                } else if (value !== this.registerForm.mima) {
+                    callback(new Error('两次输入的密码不一致'));
+                } else {
+                    callback();
+                }
+            },
+            validatePhone(rule, value, callback) {
+                if (!value) {
+                    callback();
+                } else if (!toolUtil.isMobile(value)) {
+                    callback(new Error('请输入正确的手机号码'));
+                } else {
+                    callback();
+                }
+            },
+            touxiangUploadSuccess(fileUrls){
+                this.registerForm.touxiang = fileUrls;
+            },
+            getUUID(){
+                return new Date().getTime();
+            },
+            toLogin() {
+                location.href = '../login.html'
+            },
+            handleRegister(){
+                this.$refs['registerForm'].validate((valid) => {
+                    if (valid) {
+                        this.loading = true;
+                let url = "huishourenyuan/register";
+                        
+                        // 处理头像URL
+                        if(this.registerForm.touxiang != null){
+                    this.registerForm.touxiang = this.registerForm.touxiang.replace(new RegExp(baseUrl,"g"),"");
+                }
+                        
+                        http.post(url, this.registerForm).then(res => {
+                            this.$message.success('注册成功，即将跳转到登录页面')
+                            this.loading = false;
+                            setTimeout(() => {
+                        location.replace('../login.html')
+                            }, 1500)
+                        }).catch(e => {
+                            this.loading = false;
+                })
+                    }
+                });
+            },
+        },
+
+    })
+</script>
+<style>
+/* 环保主题配色 */
+:root {
+    --eco-primary: #4CAF50;
+    --eco-primary-dark: #2E7D32;
+    --eco-primary-light: #66BB6A;
+    --eco-secondary: #81C784;
+    --eco-bg: #F1F8F4;
+    --eco-text: #2E7D32;
+    --eco-border: #C8E6C9;
+    --eco-shadow: rgba(76, 175, 80, 0.15);
+}
+
+/* 总容器 */
+#page {
+    background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 50%, #A5D6A7 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    padding: 20px;
+}
+
+/* 背景装饰 */
+#page::before {
+    content: '';
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    background: 
+        radial-gradient(circle at 20% 30%, rgba(76, 175, 80, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(46, 125, 50, 0.1) 0%, transparent 50%);
+    animation: float 20s ease-in-out infinite;
+    z-index: 0;
+}
+
+@keyframes float {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    50% { transform: translate(-50px, -50px) rotate(180deg); }
+}
+
+/* 注册容器 */
+.register-wrapper {
+    background: #fff;
+    box-sizing: border-box;
+    padding: 0;
+    width: 100%;
+    max-width: 600px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(46, 125, 50, 0.2);
+    z-index: 1;
+    overflow: hidden;
+    animation: slideInUp 0.6s ease-out;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 头部 */
+.register-header {
+    background: linear-gradient(135deg, var(--eco-primary) 0%, var(--eco-primary-dark) 100%);
+    padding: 40px 30px 30px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.register-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="80" r="2" fill="rgba(255,255,255,0.1)"/></svg>');
+    opacity: 0.3;
+}
+
+.eco-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+    animation: pulse 2s ease-in-out infinite;
+    position: relative;
+    z-index: 1;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.form-name {
+    padding: 0;
+    margin: 0 0 8px 0;
+    color: #fff;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.4;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+.form-subtitle {
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 14px;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+}
+
+/* 表单容器 */
+.register-form-container {
+    padding: 30px 40px 40px;
+    background: #fff;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.register-form {
+    padding: 0;
+    background: transparent;
+}
+
+/* 表单项 */
+.form-item-modern {
+    margin-bottom: 0 !important;
+    padding-bottom: 20px !important;
+}
+
+.form-item-modern.upload-item {
+    padding-bottom: 10px !important;
+}
+
+/* 输入框容器 */
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    border: 2px solid var(--eco-border);
+    border-radius: 12px;
+    padding: 0 15px;
+    transition: all 0.3s ease;
+    background: #fff;
+}
+
+.input-wrapper:hover {
+    border-color: var(--eco-primary-light);
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+.input-wrapper:focus-within {
+    border-color: var(--eco-primary);
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.15);
+}
+
+.input-icon {
+    color: var(--eco-primary);
+    font-size: 18px;
+    margin-right: 12px;
+    display: flex;
+    align-items: center;
+}
+
+.modern-input {
+    flex: 1;
+}
+
+.modern-input .el-input__inner {
+    border: none !important;
+    padding: 12px 0;
+    font-size: 15px;
+    background: transparent;
+    height: auto;
+    line-height: 1.5;
+}
+
+.modern-input .el-input__inner:focus {
+    border: none !important;
+    box-shadow: none;
+}
+
+.modern-input .el-input__inner::placeholder {
+    color: #bbb;
+}
+
+/* 选择框样式 */
+.modern-select {
+    flex: 1;
+}
+
+.modern-select .el-input__inner {
+    border: none !important;
+    padding: 12px 0;
+    font-size: 15px;
+    background: transparent;
+    height: auto;
+    line-height: 1.5;
+}
+
+.modern-select .el-input__inner:focus {
+    border: none !important;
+    box-shadow: none;
+}
+
+.el-select-dropdown {
+    border-radius: 12px;
+    border: 1px solid var(--eco-border);
+}
+
+.el-select-dropdown__item.hover,
+.el-select-dropdown__item:hover {
+    background: var(--eco-bg);
+    color: var(--eco-primary-dark);
+}
+
+.el-select-dropdown__item.selected {
+    color: var(--eco-primary);
+    font-weight: 600;
+    background: var(--eco-bg);
+}
+
+/* 上传组件样式 */
+.upload-wrapper {
+width: 100%;  
+}
+
+.register-form .el-upload .el-button {
+    background: var(--eco-primary);
+    border: 0;
+    border-radius: 8px;
+    color: #fff;
+    transition: all 0.3s;
+}
+
+.register-form .el-upload .el-button:hover {
+    background: var(--eco-primary-dark);
+}
+
+.register-form .el-upload-list__item.is-success {
+    width: 120px;
+    height: 120px;
+    border-radius: 12px;
+    border: 2px solid var(--eco-border);
+}
+
+.register-form .el-upload.el-upload--picture-card {
+    width: 120px;
+    height: 120px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 12px;
+    border: 2px dashed var(--eco-border);
+    background: var(--eco-bg);
+    transition: all 0.3s;
+}
+
+.register-form .el-upload--picture-card:hover,
+.register-form .el-upload:focus {
+    border-color: var(--eco-primary);
+    color: var(--eco-primary);
+    background: rgba(76, 175, 80, 0.05);
+}
+
+.el-upload-list--picture-card .el-upload-list__item-status-label {
+    background: var(--eco-primary);
+}
+
+/* 按钮区域 */
+.btn-row-modern {
+    width: 100%;
+    background: transparent;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: stretch;
+}
+
+.register-btn-modern {
+    width: 100%;
+    height: 50px;
+    line-height: 50px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    background: linear-gradient(135deg, var(--eco-primary) 0%, var(--eco-primary-dark) 100%);
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+}
+
+.register-btn-modern:hover {
+    background: linear-gradient(135deg, var(--eco-primary-dark) 0%, var(--eco-primary) 100%);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+    transform: translateY(-2px);
+}
+
+.register-btn-modern:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(76, 175, 80, 0.3);
+}
+
+/* 登录链接 */
+.login-link {
+    text-align: center;
+    font-size: 14px;
+    color: #999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.login-btn-link {
+    color: var(--eco-primary) !important;
+    font-weight: 600;
+    padding: 0 !important;
+    height: auto !important;
+    line-height: 1.5 !important;
+    border: none !important;
+    background: none !important;
+}
+
+.login-btn-link:hover {
+    color: var(--eco-primary-dark) !important;
+    text-decoration: underline;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .register-wrapper {
+        width: 100%;
+        margin: 10px;
+    }
+    
+    .register-form-container {
+        padding: 25px 25px 30px;
+        max-height: 65vh;
+    }
+    
+    .register-header {
+        padding: 30px 20px 25px;
+    }
+    
+    .eco-icon {
+        font-size: 40px;
+    }
+    
+    .form-name {
+        font-size: 20px;
+    }
+}
+
+/* 滚动条美化 */
+.register-form-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.register-form-container::-webkit-scrollbar-track {
+    background: var(--eco-bg);
+    border-radius: 3px;
+}
+
+.register-form-container::-webkit-scrollbar-thumb {
+    background: var(--eco-primary);
+    border-radius: 3px;
+}
+
+.register-form-container::-webkit-scrollbar-thumb:hover {
+    background: var(--eco-primary-dark);
+}
+
+</style>
+</html>

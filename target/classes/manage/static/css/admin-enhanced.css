@@ -1,0 +1,543 @@
+/* 管理端增强UI美化样式 - 废旧物品回收系统 */
+
+/* 管理端配色方案 */
+:root {
+    /* 管理端专用配色 */
+    --admin-primary: #1890ff;
+    --admin-primary-light: #40a9ff;
+    --admin-primary-dark: #096dd9;
+    --admin-success: #52c41a;
+    --admin-warning: #faad14;
+    --admin-error: #f5222d;
+    --admin-info: #13c2c2;
+    
+    /* 管理端渐变 */
+    --admin-gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --admin-gradient-sidebar: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+    --admin-gradient-header: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    
+    /* 管理端阴影 */
+    --admin-shadow-light: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --admin-shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.12);
+    --admin-shadow-heavy: 0 8px 32px rgba(0, 0, 0, 0.16);
+    
+    /* 管理端圆角 */
+    --admin-radius-sm: 4px;
+    --admin-radius-md: 8px;
+    --admin-radius-lg: 12px;
+}
+
+/* 页面整体布局 */
+#page {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+}
+
+/* 页面头部美化 - 管理端顶部绿色环保导航栏 */
+#pageHeader {
+    /* 高度与布局在 index.css 中统一，这里只负责主题与质感 */
+    background:
+        radial-gradient(120% 140% at 0% 0%, rgba(200, 230, 201, 0.45), transparent 60%),
+        radial-gradient(130% 150% at 100% 0%, rgba(129, 199, 132, 0.55), transparent 65%),
+        linear-gradient(120deg, #1B5E20 0%, #2E7D32 40%, #43A047 75%, #66BB6A 100%);
+    box-shadow: 0 6px 18px rgba(46, 125, 50, 0.25);
+    border-bottom: none;
+    backdrop-filter: blur(10px);
+}
+
+.project-name {
+    font-size: 20px;
+    font-weight: 700;
+    /* 绿色渐变标题，呼应环保主题 */
+    background: linear-gradient(120deg, #E8F5E9, #C8E6C9, #A5D6A7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
+    letter-spacing: 2px;
+}
+
+/* 面包屑美化 - 顶部导航中的路径标签 */
+.breadcrumb {
+    background: rgba(255, 255, 255, 0.14);
+    padding: 6px 14px;
+    border-radius: 999px;
+    backdrop-filter: blur(6px);
+}
+
+.breadcrumb .el-breadcrumb__item {
+    color: #E8F5E9;
+    font-weight: 500;
+}
+
+.breadcrumb .el-breadcrumb__item:last-child {
+    color: #FFFDE7;
+}
+
+/* 侧边栏美化 */
+.page-aside {
+    background: var(--admin-gradient-sidebar);
+    box-shadow: var(--admin-shadow-medium);
+}
+
+.el-menu {
+    background: transparent !important;
+    border: none;
+}
+
+.el-menu-item {
+    background: transparent !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    transition: all 0.3s ease;
+    margin: 4px 8px;
+    border-radius: var(--admin-radius-sm);
+}
+
+.el-menu-item:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
+    transform: translateX(4px);
+}
+
+.el-menu-item.is-active {
+    background: var(--admin-primary) !important;
+    color: white !important;
+    box-shadow: var(--admin-shadow-light);
+}
+
+.el-submenu__title {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-weight: 600;
+    padding-left: 20px !important;
+}
+
+.el-submenu__title:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
+}
+
+/* 主内容区域美化 */
+.el-main {
+    background: transparent;
+    padding: 24px;
+}
+
+.child-page {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: var(--admin-radius-lg);
+    box-shadow: var(--admin-shadow-light);
+    padding: 24px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* 查询表单美化 */
+.list-query-row {
+    background: rgba(255, 255, 255, 0.8);
+    padding: 20px;
+    border-radius: var(--admin-radius-md);
+    margin-bottom: 20px;
+    box-shadow: var(--admin-shadow-light);
+    backdrop-filter: blur(5px);
+}
+
+.list-query-row .el-form-item {
+    margin-bottom: 16px;
+}
+
+.query-input .el-input__inner,
+.query-select .el-input__inner {
+    border: 2px solid rgba(24, 144, 255, 0.1);
+    border-radius: var(--admin-radius-sm);
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.query-input .el-input__inner:focus,
+.query-select .el-input__inner:focus {
+    border-color: var(--admin-primary);
+    box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.1);
+    transform: translateY(-1px);
+}
+
+/* 按钮美化 */
+.el-button {
+    border-radius: var(--admin-radius-sm);
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: var(--admin-shadow-light);
+}
+
+.el-button--primary {
+    background: var(--admin-gradient-primary);
+    border: none;
+    color: white;
+}
+
+.el-button--primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--admin-shadow-medium);
+    filter: brightness(1.1);
+}
+
+.el-button--success {
+    background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+    border: none;
+}
+
+.el-button--warning {
+    background: linear-gradient(135deg, #faad14 0%, #ffc53d 100%);
+    border: none;
+}
+
+.el-button--danger {
+    background: linear-gradient(135deg, #f5222d 0%, #ff4d4f 100%);
+    border: none;
+}
+
+.el-button--info {
+    background: linear-gradient(135deg, #13c2c2 0%, #36cfc9 100%);
+    border: none;
+}
+
+/* 操作按钮行美化 */
+.btns-row {
+    background: rgba(255, 255, 255, 0.8);
+    padding: 16px 20px;
+    border-radius: var(--admin-radius-md);
+    margin-bottom: 20px;
+    box-shadow: var(--admin-shadow-light);
+    backdrop-filter: blur(5px);
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* 表格美化 */
+.table-wrapper {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: var(--admin-radius-md);
+    overflow: hidden;
+    box-shadow: var(--admin-shadow-light);
+    backdrop-filter: blur(10px);
+}
+
+.el-table {
+    background: transparent;
+}
+
+.el-table th {
+    background: rgba(24, 144, 255, 0.05) !important;
+    color: var(--admin-primary-dark);
+    font-weight: 600;
+    border-bottom: 2px solid rgba(24, 144, 255, 0.1);
+}
+
+.el-table td {
+    border-bottom: 1px solid rgba(24, 144, 255, 0.05);
+}
+
+.el-table tbody tr:hover {
+    background: rgba(24, 144, 255, 0.03) !important;
+}
+
+.el-table tbody tr:nth-child(even) {
+    background: rgba(24, 144, 255, 0.01);
+}
+
+/* 分页美化 */
+.pagination-row {
+    display: flex;
+    justify-content: center;
+    margin-top: 24px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: var(--admin-radius-md);
+    backdrop-filter: blur(10px);
+}
+
+.el-pagination .el-pager li {
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: var(--admin-radius-sm);
+    margin: 0 4px;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(24, 144, 255, 0.1);
+}
+
+.el-pagination .el-pager li:hover {
+    background: var(--admin-primary);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: var(--admin-shadow-light);
+}
+
+.el-pagination .el-pager li.active {
+    background: var(--admin-gradient-primary);
+    color: white;
+    border-color: var(--admin-primary);
+}
+
+/* 对话框美化 */
+.el-dialog {
+    border-radius: var(--admin-radius-lg);
+    box-shadow: var(--admin-shadow-heavy);
+    backdrop-filter: blur(10px);
+}
+
+.el-dialog__header {
+    background: var(--admin-gradient-primary);
+    color: white;
+    border-radius: var(--admin-radius-lg) var(--admin-radius-lg) 0 0;
+    padding: 20px 24px;
+}
+
+.el-dialog__title {
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.el-dialog__body {
+    padding: 24px;
+    background: rgba(255, 255, 255, 0.95);
+}
+
+/* 表单美化 */
+.formModel_form .el-form-item__label {
+    color: var(--admin-primary-dark);
+    font-weight: 600;
+}
+
+.formModel_form .el-input__inner,
+.formModel_form .el-textarea__inner {
+    border: 2px solid rgba(24, 144, 255, 0.1);
+    border-radius: var(--admin-radius-sm);
+    transition: all 0.3s ease;
+}
+
+.formModel_form .el-input__inner:focus,
+.formModel_form .el-textarea__inner:focus {
+    border-color: var(--admin-primary);
+    box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.1);
+}
+
+/* 统计图表对话框美化 */
+.el-dialog[aria-label*="类型"] {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(15px);
+}
+
+/* 用户头像下拉菜单美化 */
+.user-avatar {
+    transition: all 0.3s ease;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: var(--admin-shadow-light);
+}
+
+.user-avatar:hover {
+    transform: scale(1.05);
+    box-shadow: var(--admin-shadow-medium);
+}
+
+.dropdown-menu {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: var(--admin-radius-md);
+    box-shadow: var(--admin-shadow-medium);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .child-page {
+        padding: 16px;
+        margin: 10px;
+    }
+    
+    .list-query-row {
+        padding: 16px;
+    }
+    
+    .btns-row {
+        padding: 12px 16px;
+        justify-content: center;
+    }
+    
+    .el-main {
+        padding: 16px;
+    }
+}
+
+/* 加载动画 */
+@keyframes slideInFromTop {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.child-page {
+    animation: slideInFromTop 0.6s ease forwards;
+}
+
+/* 菜单折叠按钮美化 */
+.menu-switch {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: var(--admin-radius-sm);
+    padding: 8px;
+    transition: all 0.3s ease;
+}
+
+.menu-switch:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.05);
+}
+
+/* =========================
+   Eco Sidebar (管理端左侧任务栏)
+   说明：只覆盖菜单视觉，不改菜单数据/跳转逻辑
+   命中结构：pageAside -> el-aside#pageAside；pageMenus -> #pageMenus .el-menu
+   ========================= */
+
+/* 左侧容器：绿色渐变 + 玻璃质感 */
+#pageAside.el-aside {
+    background: linear-gradient(180deg, #1B5E20 0%, #2E7D32 38%, #388E3C 100%) !important;
+    border-right: 1px solid rgba(200, 230, 201, 0.25) !important;
+    box-shadow: 0 10px 30px rgba(27, 94, 32, 0.25) !important;
+    position: relative;
+}
+
+/* 轻微纹理与高光 */
+#pageAside.el-aside::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(600px 300px at 20% 0%, rgba(255,255,255,0.16), transparent 60%),
+        radial-gradient(800px 400px at 80% 20%, rgba(255,255,255,0.10), transparent 55%),
+        linear-gradient(180deg, rgba(255,255,255,0.08), transparent 40%);
+    opacity: 0.9;
+}
+
+/* 菜单本体透明化 */
+#pageMenus .el-menu {
+    background: transparent !important;
+    border-right: none !important;
+    padding: 10px 8px 12px;
+}
+
+/* 一级菜单/标题：统一高度、圆角、间距 */
+#pageMenus .el-menu > .el-menu-item,
+#pageMenus .el-menu > .el-submenu > .el-submenu__title {
+    height: 42px !important;
+    line-height: 42px !important;
+    border: none !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: rgba(255, 255, 255, 0.92) !important;
+    border-radius: 12px !important;
+    margin: 6px 6px !important;
+    padding-left: 16px !important;
+    transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    backdrop-filter: blur(6px);
+}
+
+/* 图标风格 */
+#pageMenus .el-menu .icon,
+#pageMenus .el-menu i {
+    color: rgba(255, 255, 255, 0.88) !important;
+    font-size: 20px !important;
+    margin-right: 10px;
+}
+
+/* 悬浮：轻微位移 + 高光 */
+#pageMenus .el-menu > .el-menu-item:hover,
+#pageMenus .el-menu > .el-submenu > .el-submenu__title:hover {
+    transform: translateX(4px);
+    background: rgba(255, 255, 255, 0.14) !important;
+    box-shadow: 0 10px 18px rgba(0, 0, 0, 0.18);
+}
+
+/* 选中态：亮绿色强调条 + 渐变底 */
+#pageMenus .el-menu > .el-menu-item.is-active {
+    background: linear-gradient(90deg, rgba(200, 230, 201, 0.22) 0%, rgba(255, 255, 255, 0.10) 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
+}
+
+#pageMenus .el-menu > .el-menu-item.is-active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 10px;
+    bottom: 10px;
+    width: 4px;
+    border-radius: 6px;
+    background: linear-gradient(180deg, #C8E6C9 0%, #66BB6A 100%);
+}
+
+/* 子菜单箭头更清晰 */
+#pageMenus .el-submenu__icon-arrow {
+    color: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* 二级菜单：去除 index.css 的图片背景，采用“叶片”风格点缀 */
+#pageMenus .el-submenu .el-menu .el-menu-item {
+    height: 40px !important;
+    line-height: 40px !important;
+    margin: 6px 6px 6px 18px !important;
+    border-radius: 12px !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    padding-left: 44px !important;
+    position: relative;
+    backdrop-filter: blur(6px);
+}
+
+#pageMenus .el-submenu .el-menu .el-menu-item::before {
+    content: "";
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    transform: translateY(-50%);
+    background: rgba(200, 230, 201, 0.9);
+    box-shadow: 0 0 0 4px rgba(200, 230, 201, 0.18);
+}
+
+#pageMenus .el-submenu .el-menu .el-menu-item:hover {
+    background: rgba(255, 255, 255, 0.12) !important;
+    transform: translateX(4px);
+}
+
+#pageMenus .el-submenu .el-menu .el-menu-item.is-active {
+    background: rgba(200, 230, 201, 0.18) !important;
+    color: #ffffff !important;
+}
+
+/* 折叠菜单：缩小时保留圆角与居中 */
+#pageMenus .el-menu.el-menu--collapse > .el-menu-item,
+#pageMenus .el-menu.el-menu--collapse > .el-submenu > .el-submenu__title {
+    margin: 6px 10px !important;
+    padding-left: 14px !important;
+}
+
+/* 侧边栏滚动条（Windows 下更友好） */
+#pageAside.el-aside::-webkit-scrollbar {
+    width: 8px;
+}
+#pageAside.el-aside::-webkit-scrollbar-thumb {
+    background: rgba(200, 230, 201, 0.35);
+    border-radius: 8px;
+}
+#pageAside.el-aside::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.06);
+}

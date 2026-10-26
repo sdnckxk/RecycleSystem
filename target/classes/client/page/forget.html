@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>找回密码</title>
+    <link rel="stylesheet" href="../static/modules/elementui/theme/index.css">
+    <link rel="stylesheet" href="../static/modules/animate.min.css">
+    <script src="../static/modules/wow.min.js"></script>
+    <link rel="stylesheet" href="../static/css/app.css">
+    <link rel="stylesheet" href="../static/css/index.css">
+    <script src="../static/modules/vue.min.js"></script>
+    <script src="../static/modules/elementui/index.js"></script>
+    <script src="../static/iconfont/iconfont.js"></script>
+</head>
+<body>
+<el-container id="page" v-cloak>
+    <el-main id="main">
+        <div class="forget-wrapper">
+            <!-- 环保主题头部 -->
+            <div class="forget-header">
+                <div class="eco-icon">🔒</div>
+                <div class="form-name">找回密码</div>
+                <div class="form-subtitle">通过手机号重置您的密码</div>
+            </div>
+            
+            <!-- 步骤条 -->
+            <div class="steps-container">
+                <el-steps ref="steps" :active="pageType" class="steps-modern" :align-center="true" finish-status="success">
+                    <el-step title="验证身份" description="输入手机号">
+                </el-step>
+                    <el-step title="验证码" description="输入验证码">
+                </el-step>
+                    <el-step title="重置密码" description="设置新密码">
+                </el-step>
+            </el-steps>
+            </div>
+            
+            <!-- 表单内容 -->
+            <div class="forget-form-container">
+                <el-form ref="forgetForm" :model="forgetForm" :rules="rules" class="forget-form" size="small">
+                    <!-- 第一步：输入手机号 -->
+                    <template v-if="pageType == 0">
+                        <el-form-item prop="phone" class="form-item-modern">
+                            <div class="input-wrapper">
+                                <div class="input-icon">
+                                    <iconfont icon="el-icon-phone"></iconfont>
+                                </div>
+                                <el-input 
+                                    v-model="forgetForm.phone" 
+                                    placeholder="请输入注册手机号"
+                                    maxlength="11"
+                                    class="modern-input">
+                                </el-input>
+                            </div>
+                        </el-form-item>
+                        <div class="form-tip">
+                            <iconfont icon="el-icon-info"></iconfont>
+                            <span>请输入您注册时使用的手机号码</span>
+                        </div>
+                    </template>
+                    
+                    <!-- 第二步：输入验证码 -->
+                    <template v-if="pageType == 1">
+                        <el-form-item prop="code" class="form-item-modern">
+                            <div class="input-wrapper">
+                                <div class="input-icon">
+                                    <iconfont icon="el-icon-message"></iconfont>
+                                </div>
+                                <el-input 
+                                    v-model="forgetForm.code" 
+                                    placeholder="请输入验证码"
+                                    maxlength="6"
+                                    class="modern-input">
+                                </el-input>
+                            </div>
+                        </el-form-item>
+                        <div class="form-tip">
+                            <iconfont icon="el-icon-info"></iconfont>
+                            <span>验证码已发送至手机：{{forgetForm.phone ? forgetForm.phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2') : ''}}</span>
+                        </div>
+                    </template>
+                    
+                    <!-- 第三步：设置新密码 -->
+                    <template v-if="pageType == 2">
+                        <el-form-item prop="newPassword" class="form-item-modern">
+                            <div class="input-wrapper">
+                                <div class="input-icon">
+                                    <iconfont icon="el-icon-lock"></iconfont>
+                                </div>
+                                <el-input 
+                                    v-model="forgetForm.newPassword" 
+                                    type="password"
+                                    placeholder="请输入新密码（6-20位）"
+                                    show-password
+                                    class="modern-input">
+                                </el-input>
+                            </div>
+                        </el-form-item>
+                        <el-form-item prop="confirmPassword" class="form-item-modern">
+                            <div class="input-wrapper">
+                                <div class="input-icon">
+                                    <iconfont icon="el-icon-lock"></iconfont>
+                                </div>
+                                <el-input 
+                                    v-model="forgetForm.confirmPassword" 
+                                    type="password"
+                                    placeholder="请再次输入新密码"
+                                    show-password
+                                    class="modern-input">
+                                </el-input>
+                            </div>
+                        </el-form-item>
+                        <div class="form-tip">
+                            <iconfont icon="el-icon-info"></iconfont>
+                            <span>密码长度为6-20位，建议包含字母和数字</span>
+                        </div>
+                    </template>
+            </el-form>
+                
+                <!-- 按钮区域 -->
+                <div class="btns-modern">
+                    <el-button 
+                        v-if="pageType == 0" 
+                        type="primary" 
+                        class="action-btn" 
+                        @click="getSecurity"
+                        :loading="loading">
+                        <span>获取验证码</span>
+                    </el-button>
+                    <el-button 
+                        v-if="pageType == 1" 
+                        type="primary" 
+                        class="action-btn" 
+                        @click="validateSecurity"
+                        :loading="loading">
+                        <span>验证验证码</span>
+                    </el-button>
+                    <el-button 
+                        v-if="pageType == 2" 
+                        type="primary" 
+                        class="action-btn" 
+                        @click="updatePassword"
+                        :loading="loading">
+                        <span>重置密码</span>
+                    </el-button>
+                    
+                    <div class="back-login">
+                        <el-button type="text" class="back-btn" @click="backToLogin">
+                            <iconfont icon="el-icon-arrow-left"></iconfont>
+                            <span>返回登录</span>
+                        </el-button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </el-main>
+</el-container>
+</body>
+<script src='../static/modules/axios.min.js'></script>
+<script src="../utils/http.js"></script>
+<script src="../utils/system.js"></script>
+<script src="../utils/global_mixin.js"></script>
+<script src="../utils/toolUtil.js"></script>
+
+<script src="../components/page-header.js"></script>
+<script>
+    var vm = new Vue({
+        el: '#page',
+        data(){
+            return {
+                pageType: 0,
+                loading: false,
+                forgetForm: {
+                    phone: '',
+                    code: '',
+                    newPassword: '',
+                    confirmPassword: ''
+                },
+                rules: {}
+            }
+        },
+        created() {
+            // 在created中设置rules，确保可以访问methods
+            this.rules = {
+                phone: [
+                    { required: true, message: '请输入手机号', trigger: 'blur' },
+                    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号', trigger: 'blur' }
+                ],
+                code: [
+                    { required: true, message: '请输入验证码', trigger: 'blur' },
+                    { pattern: /^\d{6}$/, message: '验证码为6位数字', trigger: 'blur' }
+                ],
+                newPassword: [
+                    { required: true, message: '请输入新密码', trigger: 'blur' },
+                    { min: 6, max: 20, message: '密码长度为6-20位', trigger: 'blur' }
+                ],
+                confirmPassword: [
+                    { required: true, message: '请再次输入密码', trigger: 'blur' },
+                    { validator: this.validateConfirmPassword, trigger: 'blur' }
+                ]
+            };
+        },
+        methods: {
+            // 验证确认密码
+            validateConfirmPassword(rule, value, callback) {
+                if (!value) {
+                    callback(new Error('请再次输入密码'));
+                } else if (value !== this.forgetForm.newPassword) {
+                    callback(new Error('两次输入的密码不一致'));
+                } else {
+                    callback();
+                }
+            },
+            // 获取验证码
+            getSecurity() {
+                this.$refs['forgetForm'].validateField('phone', (valid) => {
+                    if (!valid) {
+                        this.loading = true;
+                        // 这里调用后端API发送验证码
+                        // http.post('yonghu/sendCode', { phone: this.forgetForm.phone }).then(res => {
+                        //     this.$message.success('验证码已发送');
+                        //     this.pageType = 1;
+                        //     this.loading = false;
+                        // }).catch(e => {
+                        //     this.loading = false;
+                        // });
+                        
+                        // 模拟发送验证码
+                        setTimeout(() => {
+                            this.$message.success('验证码已发送至您的手机');
+                            this.pageType = 1;
+                            this.loading = false;
+                        }, 1000);
+                    }
+                });
+            },
+            // 验证验证码
+            validateSecurity() {
+                this.$refs['forgetForm'].validateField('code', (valid) => {
+                    if (!valid) {
+                        this.loading = true;
+                        // 这里调用后端API验证验证码
+                        // http.post('yonghu/verifyCode', { 
+                        //     phone: this.forgetForm.phone,
+                        //     code: this.forgetForm.code 
+                        // }).then(res => {
+                        //     this.$message.success('验证成功');
+                        //     this.pageType = 2;
+                        //     this.loading = false;
+                        // }).catch(e => {
+                        //     this.loading = false;
+                        // });
+                        
+                        // 模拟验证验证码
+                        setTimeout(() => {
+                            this.$message.success('验证码验证成功');
+                            this.pageType = 2;
+                            this.loading = false;
+                        }, 1000);
+                    }
+                });
+            },
+            // 重置密码
+            updatePassword() {
+                this.$refs['forgetForm'].validate((valid) => {
+                    if (valid) {
+                        this.loading = true;
+                        // 这里调用后端API重置密码
+                        // http.post('yonghu/resetPassword', {
+                        //     phone: this.forgetForm.phone,
+                        //     code: this.forgetForm.code,
+                        //     newPassword: this.forgetForm.newPassword
+                        // }).then(res => {
+                        //     this.$message.success('密码重置成功，请重新登录');
+                        //     setTimeout(() => {
+                        //         location.href = '../page/login.html';
+                        //     }, 1500);
+                        // }).catch(e => {
+                        //     this.loading = false;
+                        // });
+                        
+                        // 模拟重置密码
+                        setTimeout(() => {
+                            this.$message.success('密码重置成功，请重新登录');
+                            this.loading = false;
+                            setTimeout(() => {
+                                location.href = '../page/login.html';
+                            }, 1500);
+                        }, 1000);
+                    }
+                });
+            },
+            // 返回登录
+            backToLogin() {
+                location.href = '../page/login.html';
+            }
+        }
+    })
+</script>
+<script>
+//须先设置css盒子的animation-duration
+
+new WOW({
+    //boxClass: 'search-box', //目标dom的class
+    //animateClass: 'animate__fadeInDown', //动画名
+}).init()
+
+
+</script>
+<style>
+/* 环保主题配色 */
+:root {
+    --eco-primary: #4CAF50;
+    --eco-primary-dark: #2E7D32;
+    --eco-primary-light: #66BB6A;
+    --eco-secondary: #81C784;
+    --eco-bg: #F1F8F4;
+    --eco-text: #2E7D32;
+    --eco-border: #C8E6C9;
+    --eco-shadow: rgba(76, 175, 80, 0.15);
+}
+
+#page {
+    margin: 0;
+    padding: 0;
+}
+
+/* 主背景 */
+#main {
+    background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 50%, #A5D6A7 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    padding: 20px;
+}
+
+/* 背景装饰 */
+#main::before {
+    content: '';
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    background: 
+        radial-gradient(circle at 20% 30%, rgba(76, 175, 80, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(46, 125, 50, 0.1) 0%, transparent 50%);
+    animation: float 20s ease-in-out infinite;
+    z-index: 0;
+}
+
+@keyframes float {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    50% { transform: translate(-50px, -50px) rotate(180deg); }
+}
+
+/* 忘记密码容器 */
+.forget-wrapper {
+    background: #fff;
+    box-sizing: border-box;
+    padding: 0;
+    width: 100%;
+    max-width: 600px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(46, 125, 50, 0.2);
+    z-index: 1;
+    overflow: hidden;
+    animation: slideInUp 0.6s ease-out;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 头部 */
+.forget-header {
+    background: linear-gradient(135deg, var(--eco-primary) 0%, var(--eco-primary-dark) 100%);
+    padding: 40px 30px 30px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.forget-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="80" r="2" fill="rgba(255,255,255,0.1)"/></svg>');
+    opacity: 0.3;
+}
+
+.eco-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+    animation: pulse 2s ease-in-out infinite;
+    position: relative;
+    z-index: 1;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.form-name {
+    padding: 0;
+    margin: 0 0 8px 0;
+    color: #fff;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.4;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+.form-subtitle {
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 14px;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+}
+
+/* 步骤条容器 */
+.steps-container {
+    background: #fff;
+    padding: 30px 20px;
+}
+
+.steps-modern {
+    padding: 0;
+}
+
+.steps-modern .el-step__head.is-process {
+    color: var(--eco-primary);
+    border-color: var(--eco-primary);
+}
+
+.steps-modern .el-step__head.is-finish {
+    color: var(--eco-primary);
+    border-color: var(--eco-primary);
+}
+
+.steps-modern .el-step__title.is-process {
+    color: var(--eco-primary);
+    font-weight: 600;
+}
+
+.steps-modern .el-step__title.is-finish {
+    color: var(--eco-primary-dark);
+}
+
+.steps-modern .el-step__description.is-process {
+    color: var(--eco-primary);
+}
+
+.steps-modern .el-step__description.is-finish {
+    color: var(--eco-primary-dark);
+}
+
+/* 表单容器 */
+.forget-form-container {
+    padding: 30px 40px 40px;
+    background: #fff;
+}
+
+.forget-form {
+    padding: 0;
+    background: transparent;
+}
+
+/* 表单项 */
+.form-item-modern {
+    margin-bottom: 0 !important;
+    padding-bottom: 20px !important;
+}
+
+/* 输入框容器 */
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    border: 2px solid var(--eco-border);
+    border-radius: 12px;
+    padding: 0 15px;
+    transition: all 0.3s ease;
+    background: #fff;
+}
+
+.input-wrapper:hover {
+    border-color: var(--eco-primary-light);
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+.input-wrapper:focus-within {
+    border-color: var(--eco-primary);
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.15);
+}
+
+.input-icon {
+    color: var(--eco-primary);
+    font-size: 18px;
+    margin-right: 12px;
+    display: flex;
+    align-items: center;
+}
+
+.modern-input {
+    flex: 1;
+}
+
+.modern-input .el-input__inner {
+    border: none !important;
+    padding: 12px 0;
+    font-size: 15px;
+    background: transparent;
+    height: auto;
+    line-height: 1.5;
+}
+
+.modern-input .el-input__inner:focus {
+    border: none !important;
+    box-shadow: none;
+}
+
+.modern-input .el-input__inner::placeholder {
+    color: #bbb;
+}
+
+/* 提示信息 */
+.form-tip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #999;
+    font-size: 13px;
+    margin-top: -10px;
+    margin-bottom: 10px;
+    padding-left: 5px;
+}
+
+.form-tip .iconfont {
+    color: var(--eco-primary);
+    font-size: 14px;
+}
+
+/* 按钮区域 */
+.btns-modern {
+    width: 100%;
+    background: transparent;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: stretch;
+}
+
+.action-btn {
+    width: 100%;
+    height: 50px;
+    line-height: 50px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    background: linear-gradient(135deg, var(--eco-primary) 0%, var(--eco-primary-dark) 100%);
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+}
+
+.action-btn:hover {
+    background: linear-gradient(135deg, var(--eco-primary-dark) 0%, var(--eco-primary) 100%);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+    transform: translateY(-2px);
+}
+
+.action-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(76, 175, 80, 0.3);
+}
+
+/* 返回登录 */
+.back-login {
+    text-align: center;
+}
+
+.back-btn {
+    color: var(--eco-primary) !important;
+    font-size: 14px !important;
+    padding: 0 !important;
+    height: auto !important;
+    line-height: 1.5 !important;
+    border: none !important;
+    background: none !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+    color: var(--eco-primary-dark) !important;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .forget-wrapper {
+        width: 100%;
+        margin: 10px;
+    }
+    
+    .forget-form-container {
+        padding: 25px 25px 30px;
+    }
+    
+    .forget-header {
+        padding: 30px 20px 25px;
+    }
+    
+    .eco-icon {
+        font-size: 40px;
+    }
+    
+    .form-name {
+        font-size: 20px;
+    }
+    
+    .steps-container {
+        padding: 20px 15px;
+    }
+}
+
+</style>
+</html>

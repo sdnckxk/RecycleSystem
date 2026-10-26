@@ -1,0 +1,317 @@
+/* 环保主题配色 */
+:root {
+    --eco-primary: #4CAF50;
+    --eco-primary-dark: #2E7D32;
+    --eco-primary-light: #66BB6A;
+    --eco-secondary: #81C784;
+    --eco-bg: #F1F8F4;
+    --eco-text: #2E7D32;
+    --eco-border: #C8E6C9;
+    --eco-shadow: rgba(76, 175, 80, 0.15);
+}
+
+/* 欢迎横幅 */
+.welcome-banner {
+    background: linear-gradient(135deg, var(--eco-primary) 0%, var(--eco-primary-dark) 100%);
+    border-radius: 16px;
+    padding: 30px 40px;
+    margin: 20px 0 30px;
+    box-shadow: 0 6px 24px rgba(46, 125, 50, 0.2);
+    animation: fadeInDown 0.8s ease-out;
+}
+
+.banner-content {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.banner-icon {
+    font-size: 48px;
+    animation: rotate 3s linear infinite;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.banner-text {
+    flex: 1;
+    color: #fff;
+}
+
+.banner-text h2 {
+    margin: 0 0 8px 0;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.banner-text p {
+    margin: 0;
+    font-size: 14px;
+    opacity: 0.95;
+}
+
+/* 统计卡片列表 */
+.count_list {
+  display: flex;
+    justify-content: flex-start;
+    gap: 24px;
+    padding: 0;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+/* 统计卡片 */
+.count_item {
+  flex: 1;
+    min-width: 280px;
+    max-width: 400px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 20px rgba(76, 175, 80, 0.1);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    animation: fadeInUp 0.8s ease-out;
+ } 
+
+.count_item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--eco-primary) 0%, var(--eco-primary-dark) 100%);
+ } 
+
+.count_item:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 30px rgba(76, 175, 80, 0.25);
+}
+
+.count_item.eco-card-1 {
+    animation-delay: 0.1s;
+ }
+
+.count_item.eco-card-2 {
+    animation-delay: 0.2s;
+}
+
+.count_item.eco-card-3 {
+    animation-delay: 0.3s;
+ }
+
+.count_item.eco-card-4 {
+    animation-delay: 0.4s;
+}
+
+.count_item.eco-card-5 {
+    animation-delay: 0.5s;
+ }
+
+/* 卡片头部 */
+.count_item .item-head {
+    width: 100%;
+  display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  font-size: 16px;
+}
+
+.item-icon {
+    font-size: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    background: var(--eco-bg);
+    border-radius: 12px;
+}
+
+.count_item .item-head-title {
+    flex: 1;
+    color: var(--eco-text);
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* 卡片内容 */
+.count_item .item-content {
+  display: flex;
+    flex-direction: column;
+    align-items: center;
+  justify-content: center;
+    padding: 10px 0;
+}
+
+.count_item .item_num {
+    width: 100%;
+    text-align: center;
+    font-size: 42px;
+    font-weight: 700;
+    color: var(--eco-primary-dark);
+    margin-bottom: 8px;
+    font-family: 'Arial', sans-serif;
+    line-height: 1.2;
+}
+
+.count_item .item_title {
+    width: 100%;
+    text-align: center;
+  font-size: 14px;
+    color: #999;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* 卡片底部 */
+.item-footer {
+    position: absolute;
+    bottom: 20px;
+    right: 24px;
+    color: var(--eco-primary);
+    font-size: 18px;
+    opacity: 0.6;
+    transition: all 0.3s;
+}
+
+.count_item:hover .item-footer {
+    opacity: 1;
+    transform: translateX(5px);
+}
+
+/* 图表列表 */
+.chart_list {
+  display: flex;
+  flex-wrap: wrap;
+    gap: 24px;
+    margin-top: 0;
+    justify-content: flex-start;
+    animation: fadeInUp 1s ease-out;
+}
+
+/* 图表项 */
+.chart_list .chart_item {
+    flex: 1;
+    min-width: 48%;
+    background: #fff;
+    border-radius: 16px;
+    padding: 0;
+    margin-bottom: 0;
+    box-shadow: 0 4px 20px rgba(76, 175, 80, 0.1);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.chart_list .chart_item:hover {
+    box-shadow: 0 8px 30px rgba(76, 175, 80, 0.2);
+    transform: translateY(-4px);
+}
+
+/* 图表头部 */
+.chart-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 24px;
+    background: linear-gradient(135deg, var(--eco-primary) 0%, var(--eco-primary-dark) 100%);
+    color: #fff;
+}
+
+.chart-icon {
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+  justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+}
+
+.chart-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* 图表容器 */
+.chart_list .chart_item .Echart {
+    width: 100%;
+    height: 400px;
+    background: #fff;
+    padding: 20px;
+    border: none;
+}
+
+/* 动画 */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+}
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+    .chart_list .chart_item {
+        min-width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .count_list {
+        flex-direction: column;
+    }
+    
+    .count_item {
+        min-width: 100%;
+        max-width: 100%;
+    }
+    
+    .welcome-banner {
+        padding: 20px;
+    }
+    
+    .banner-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .banner-icon {
+        font-size: 40px;
+    }
+    
+    .banner-text h2 {
+        font-size: 20px;
+    }
+    
+    .chart_list .chart_item .Echart {
+        height: 300px;
+        padding: 15px;
+    }
+}
+

@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>废旧物品回收系统</title>
+    <link rel="stylesheet" href="../static/modules/elementui/theme/index.css">
+    <link rel="stylesheet" href="../static/modules/swiper/swiper.min.css">
+    <link rel="stylesheet" href="../static/modules/animate.min.css">
+    <script src="../static/modules/wow.min.js"></script>
+    <link rel="stylesheet" href="../static/css/app.css">
+    <link rel="stylesheet" href="../static/css/index.css">
+    <link rel="stylesheet" href="../static/css/enhanced-ui.css">
+    <script src="../static/modules/vue.min.js"></script>
+    <script src="../static/modules/elementui/index.js"></script>
+    <script src="../static/modules/swiper/swiper.min.js"></script>
+    <script src="../static/iconfont/iconfont.js"></script>
+</head>
+<body>
+<el-container id="page" v-cloak>
+    <el-header height="auto" id="pageHeader">
+        <page-header></page-header>
+        <nav-menu></nav-menu>
+    </el-header>
+    <el-container>
+        <el-main id="main">
+        <div id="child-page">
+            <div class="swiper-row">
+                <page-swiper></page-swiper>
+            </div>
+            <div class="search-row">
+            </div>
+            <!-- 环保理念横幅 -->
+            <div class="eco-banner">
+                <div class="eco-content">
+                    <div class="eco-icon">♻️</div>
+                    <div class="eco-text">
+                        <h3>绿色回收，环保生活</h3>
+                        <p>让每一件废旧物品都有价值，共建美好家园</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="show-row">
+                <!-- 废旧物品信息首页展示 -->
+                <div class="show-box recycle-box">
+                    <div class="title-wrapper">
+                        <div class="title-icon">📦</div>
+                        <div class="title">废旧物品回收</div>
+                        <div class="title-desc">让闲置物品重获新生</div>
+                    </div>
+                    <div class="list">
+                        <div class="item" v-for="item in jiuwuxinxiHomeList" :key="item.id" @click="detailClick('jiuwuxinxi',item.id)">
+                            <div class="item-image-wrapper">
+                                <img v-if="isHttp(item.tupian)" :src="item.tupian.split(',')[0]">
+                                <img v-else :src="item.tupian?baseUrl + item.tupian.split(',')[0]:''">
+                                <div class="item-overlay">
+                                    <div class="recycle-badge">可回收</div>
+                                </div>
+                            </div>
+                            <div class="info">
+                                <div class="info-item title-text">{{item.jiuwumingcheng}}</div>
+                                <div class="info-item price-text">
+                                    <span class="price-label">回收价</span>
+                                    <span class="price-value">¥{{item.huishoudanjia}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                    <div class="more" @click="moreClick('jiuwuxinxi')">
+                        <span>查看更多</span>
+                        <iconfont icon="el-icon-arrow-right"></iconfont>
+                    </div>
+                </div>
+                
+                <!-- 资讯信息首页展示 -->
+                <div class="show-box news-box-modern">
+                    <div class="title-wrapper">
+                        <div class="title-icon">📰</div>
+                        <div class="title">环保资讯</div>
+                        <div class="title-desc">了解最新回收动态</div>
+                    </div>
+                    <div class="list">
+                        <div class="item" v-for="item in zixunxinxiHomeList" :key="item.id" @click="detailClick('zixunxinxi',item.id)">
+                            <div class="item-image-wrapper">
+                                <img v-if="isHttp(item.fengmian)" :src="item.fengmian.split(',')[0]">
+                                <img v-else :src="item.fengmian?baseUrl + item.fengmian.split(',')[0]:''">
+                                <div class="item-overlay">
+                                    <div class="date-badge">{{item.faburiqi}}</div>
+                                </div>
+                            </div>
+                            <div class="info">
+                                <div class="info-item title-text">{{item.zixunbiaoti}}</div>
+                                <div class="info-item date-text">{{item.faburiqi}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="more" @click="moreClick('zixunxinxi')">
+                        <span>查看更多</span>
+                        <iconfont icon="el-icon-arrow-right"></iconfont>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </el-main>
+    </el-container>
+    <el-footer height="auto">
+        <p></p>
+    </el-footer>
+</el-container>
+</body>
+<script src="../static/modules/axios.min.js"></script>
+<script src="../utils/http.js"></script>
+<script src="../utils/system.js"></script>
+<script src="../utils/global_mixin.js"></script>
+<script src="../utils/toolUtil.js"></script>
+<!--引入组件-->
+<script src="../components/page-header.js"></script>
+<script src="../components/nav-menu.js"></script>
+<script src="../components/swiper.js"></script>
+<script src="../components/page-swiper.js"></script>
+<script>
+    var vm = new Vue({
+        el: '#page',
+        data(){
+            return {
+                zixunxinxiHomeList:[],
+                jiuwuxinxiHomeList:[],
+                token:toolUtil.storageGet("Token"),
+            }
+        },
+        created(){
+            this.init()
+        },
+        methods: {
+            init(){
+                this.getzixunxinxiHomeList()
+                this.getjiuwuxinxiHomeList()
+            },
+            //资讯信息首页展示
+            getzixunxinxiHomeList(){
+                http.get('zixunxinxi/list',{
+                    params:{
+                        page: 1,
+                        limit: 8
+                    }
+                }).then(res=>{
+                    this.zixunxinxiHomeList = res.data.data.list
+                })
+            },
+            //废旧物品信息首页展示
+            getjiuwuxinxiHomeList(){
+                http.get('jiuwuxinxi/list',{
+                    params:{
+                        page: 1,
+                        limit: 8
+                    }
+                }).then(res=>{
+                    this.jiuwuxinxiHomeList = res.data.data.list
+                })
+            },
+            //判断图片链接是否带http
+            isHttp(str){
+                return str && str.substr(0,4)=='http';
+            },
+            //跳转详情
+            detailClick(table,id){
+                location.href = `${baseUrl}client/page/${table}/detail.html?id=${id}`
+            },
+            moreClick(table){
+                location.href = `${baseUrl}client/page/${table}/list.html`
+            },
+        }
+    })
+</script>
+<script>
+//须先设置css盒子的animation-duration
+
+new WOW({
+    //boxClass: 'search-box', //目标dom的class
+    //animateClass: 'animate__fadeInDown', //动画名
+}).init()
+
+
+</script>
+<style>
+/* 环保主题配色 */
+:root {
+    --eco-primary: #4CAF50;      /* 主绿色 */
+    --eco-primary-dark: #2E7D32; /* 深绿色 */
+    --eco-primary-light: #66BB6A; /* 浅绿色 */
+    --eco-secondary: #81C784;    /* 辅助绿色 */
+    --eco-accent: #FFC107;        /* 强调色（黄色） */
+    --eco-bg: #F1F8F4;            /* 背景色 */
+    --eco-text: #2E7D32;          /* 文字色 */
+    --eco-border: #C8E6C9;        /* 边框色 */
+}
+
+.el-main {
+    padding: 0;
+    background: var(--eco-bg);
+}
+
+/* 轮播图区域 */
+.page-swiper {
+   width: var(--body-width);
+    margin: 20px auto 30px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(76, 175, 80, 0.15);
+}
+
+.swiper-wrapper {
+    margin: 0;
+    padding: 0;
+}
+
+.swiper-wrapper .swiper-slide .item {
+   width: var(--body-width);
+    margin: 0;
+}
+
+.swiper-wrapper .swiper-slide .item img {
+   width: 100%;
+    height: 400px;
+    object-fit: cover;
+}
+
+.swiper-pagination {
+    margin-bottom: 15px;
+}
+
+.swiper-pagination span {
+    width: 10px;
+    height: 10px;
+    background: var(--eco-primary);
+    border-radius: 100%;
+    opacity: 0.6;
+}
+
+.swiper-pagination span.swiper-pagination-bullet-active {
+    opacity: 1;
+    background: var(--eco-primary-dark);
+}
+
+/* 环保理念横幅 */
+.eco-banner {
+    width: var(--body-width);
+    margin: 30px auto;
+    background: linear-gradient(135deg, var(--eco-primary) 0%, var(--eco-primary-dark) 100%);
+    border-radius: 16px;
+    padding: 30px 40px;
+    box-shadow: 0 6px 24px rgba(46, 125, 50, 0.2);
+    animation: fadeInUp 0.8s ease-out;
+}
+
+.eco-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+.eco-icon {
+    font-size: 48px;
+    animation: rotate 3s linear infinite;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.eco-text {
+    color: #fff;
+    text-align: left;
+}
+
+.eco-text h3 {
+    margin: 0 0 8px 0;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.eco-text p {
+    margin: 0;
+    font-size: 16px;
+    opacity: 0.95;
+}
+
+/* 搜索区域 */
+.search-row {
+   width: var(--body-width);
+   background: none;
+    margin: 0 auto;
+    padding: 0;
+   animation-duration: 1s;
+}
+
+.search-box {
+   display: flex;
+    border: 2px solid var(--eco-border);
+   border-radius: 30px;
+   overflow: hidden;
+   width: 50%;
+    margin: 0 auto;
+    animation-duration: 1s;
+    background: #fff;
+    box-shadow: 0 2px 10px rgba(76, 175, 80, 0.1);
+}
+
+.search-box input {
+    border: none;
+}
+
+.el-select > .el-input {
+    line-height: 40px;
+}
+
+.search-box .search-inp {
+    width: 100%;
+    border: none;
+}
+
+.search-box .el-input__inner {
+    height: 40px;
+    line-height: 40px;
+}
+
+.search-box .search-btn {
+    padding: 0 10px;
+}
+
+.search-box .search-sel {
+    width: 180px;
+}
+
+.search-box .search-sel::after {
+    position: absolute;
+    top: 20%;
+    right: 0;
+    content: '';
+    width: 2px;
+    height: 60%;
+    background: var(--eco-border);
+}
+
+.search-box .el-button {
+    border: none;
+    border-radius: 0;
+    width: 110px;
+    border-left: 2px solid var(--eco-border);
+    height: 40px;
+    line-height: 40px;
+    background: var(--eco-primary);
+    color: #fff;
+}
+
+.search-box .el-button:hover {
+    background: var(--eco-primary-dark);
+    color: #fff;
+}
+
+/* 标题样式 */
+.title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+    padding: 20px 30px 20px 30px;
+    padding-right: 140px; /* 为"查看更多"按钮预留空间 */
+    background: linear-gradient(135deg, var(--eco-primary) 0%, var(--eco-primary-dark) 100%);
+    border-radius: 12px 12px 0 0;
+    position: relative;
+    overflow: hidden;
+    min-height: 60px; /* 确保有足够高度 */
+}
+
+.title-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="80" r="2" fill="rgba(255,255,255,0.1)"/></svg>');
+    opacity: 0.3;
+}
+
+.title-icon {
+    font-size: 32px;
+    z-index: 1;
+    flex-shrink: 0; /* 防止图标被压缩 */
+}
+
+.title {
+    font-size: 22px;
+    font-weight: 600;
+    color: #fff;
+    z-index: 1;
+    margin: 0;
+    flex-shrink: 0; /* 防止标题被压缩 */
+    white-space: nowrap; /* 防止标题换行 */
+}
+
+.title-desc {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.9);
+    z-index: 1;
+    margin-left: auto;
+    margin-right: 10px; /* 与按钮保持间距 */
+    white-space: nowrap; /* 防止描述文字换行 */
+    overflow: hidden;
+    text-overflow: ellipsis; /* 如果太长显示省略号 */
+    max-width: 200px; /* 限制最大宽度 */
+}
+
+.more {
+    cursor: pointer;
+    position: absolute;
+    right: 20px; /* 调整位置，避免与title-desc重叠 */
+    top: 50%;
+    transform: translateY(-50%); /* 垂直居中 */
+    background: rgba(255, 255, 255, 0.2);
+    padding: 8px 16px;
+    border-radius: 20px;
+    width: auto;
+    min-width: 100px; /* 确保按钮有足够宽度 */
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: all 0.3s;
+    z-index: 2; /* 确保在title-desc之上 */
+    white-space: nowrap; /* 防止按钮文字换行 */
+}
+
+.more:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-50%) translateX(5px); /* 保持垂直居中同时向右移动 */
+}
+
+
+.about-row{
+    width: var(--body-width);
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.about-box {
+    width: var(--body-width);
+    position: relative;
+    margin: 20px auto 0;
+    padding: 0px;
+    background: none!important;
+    order: 6;
+    animation-duration:1s;
+}
+.about-box .title {
+    border-bottom: 0px solid #ddd;
+}
+
+.about-box .content {
+    border: 0 solid #eee;
+    padding: 0;
+    margin: 10px 0 0;
+    color: #666;
+    font-size: 14px;
+    line-height: 24px;
+    float: left;
+    overflow: hidden;
+    text-indent: 2em;
+    background: none;
+    width: 60%;
+    order: 2;
+    height: 264px;
+}
+
+.about-box .img-list{
+    margin: 10px 0 0 5%;
+    display: flex;
+    width: 35%;
+    justify-content: space-between;
+    align-items: center;
+    float: right;
+    height: 240px;
+}
+.about-box img {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+}
+
+.about-box .swiper-wrapper{
+    margin-top: 40px;
+}
+.about-box .swiper-slide .item img{
+   height:200px;
+}
+
+
+
+.systemInfo-box {
+    width: var(--body-width);
+    position: relative;
+    margin: 20px auto 0;
+    padding: 0px;
+    background: none!important;
+    display: block;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    order: 7;
+    animation-duration:1s;
+}
+.systemInfo-box .title {
+    border-bottom: 0px solid #eee;
+}
+
+.systemInfo-box .content {
+    width: 100%;
+    margin: 10px 0 0;
+    padding: 0;
+    color: #666;
+    text-indent: 2em;
+    background: none;
+    border: 0 solid #eee;
+    font-size: 14px;
+    line-height: 24px;
+    height: 240px;
+    overflow: hidden;
+    order: 2;
+}
+
+.systemInfo-box .img-list {
+    display: none;
+    justify-content: space-between;
+    margin-top: 20px;
+    width:49%;
+    height:240px;
+    float:right;
+}
+
+.systemInfo-box .img-list img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+
+
+.recommend-box {
+    width: var(--body-width);
+    position: relative;
+    margin: 20px auto 0;
+    padding: 0px;
+    background: none!important;
+    animation-duration: 1s;
+}
+
+.recommend-box .list {
+    margin-top: 20px;
+    display: grid;
+    grid-template-areas:
+    '. . . .';
+    column-gap: 30px;
+    row-gap: 20px;
+}
+.recommend-box .list .item {
+    position: relative;
+    cursor: pointer;
+    border: 0px solid #eee;
+    padding: 10px;
+    background: #fff;
+}
+.recommend-box .list .item:hover {
+    background: #b41a24;
+}
+.recommend-box .list .item:hover .info .info-item{
+    color: #fff;
+}
+.recommend-box .list .item:hover .info .price{
+    color: #fff;
+}
+
+.recommend-box .list .item:first-child {
+}
+.recommend-box .list .item:last-child {
+}
+
+.recommend-box .list .item img {
+    width: 100%;
+    height: 240px;
+    object-fit: cover;
+}
+
+.recommend-box .list .item .info {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 6px 10px;
+}
+
+.recommend-box .list .item .info .info-item {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    margin-bottom: 5px;
+    color: #666;
+}
+
+.recommend-box .list .item .info .price {
+    font-family: cursive;
+    text-align: right;
+    color: #e01222;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: Avenir,Helvetica,Arial,sans-serif;
+}
+
+.recommend-box .more{
+}
+
+
+
+
+/* 展示区域 */
+.show-row {
+    width: var(--body-width);
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    padding-bottom: 40px;
+}
+
+.show-box {
+    width: 100%;
+    position: relative;
+    margin: 0;
+    padding: 0;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(76, 175, 80, 0.1);
+    overflow: hidden;
+    animation: fadeInUp 0.8s ease-out;
+    animation-duration: 1s;
+}
+
+.show-box.recycle-box {
+    animation-delay: 0.1s;
+}
+
+.show-box.news-box-modern {
+    animation-delay: 0.2s;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+}
+}
+
+/* 列表样式 */
+.show-box .list {
+    margin: 0;
+    padding: 30px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    column-gap: 24px;
+    row-gap: 24px;
+}
+
+.show-box .list .item {
+    background: #fff;
+    border: 1px solid var(--eco-border);
+    border-radius: 12px;
+    padding: 0;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.show-box .list .item:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 24px rgba(76, 175, 80, 0.25);
+    border-color: var(--eco-primary);
+}
+
+.show-box .list .item:hover .item-overlay {
+    opacity: 1;
+}
+
+/* 图片容器 */
+.item-image-wrapper {
+    position: relative;
+    width: 100%;
+    height: 220px;
+    overflow: hidden;
+    background: var(--eco-bg);
+}
+
+.show-box .list .item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.show-box .list .item:hover img {
+    transform: scale(1.1);
+}
+
+/* 悬浮层 */
+.item-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, rgba(46, 125, 50, 0.7), transparent);
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding: 12px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.recycle-badge,
+.date-badge {
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--eco-primary-dark);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* 信息区域 */
+.show-box .info {
+    width: 100%;
+    padding: 16px;
+    background: #fff;
+    box-sizing: border-box;
+}
+
+.show-box .info-item {
+    padding: 4px 0;
+    margin-bottom: 8px;
+    word-wrap: break-word; /* 防止文字溢出 */
+    overflow-wrap: break-word;
+}
+
+.show-box .info-item.title-text {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--eco-text);
+    text-align: left;
+    line-height: 1.5; /* 增加行高，避免文字重叠 */
+    min-height: 48px; /* 增加最小高度 */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 10px; /* 增加底部间距 */
+}
+
+.show-box .info-item.price-text {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px; /* 增加顶部间距 */
+    padding-top: 10px; /* 增加内边距 */
+    border-top: 1px solid var(--eco-border);
+    gap: 10px; /* 添加flex gap，确保元素之间有间距 */
+}
+
+.price-label {
+    font-size: 13px;
+    color: #999;
+    white-space: nowrap; /* 防止标签换行 */
+    flex-shrink: 0; /* 防止被压缩 */
+}
+
+.price-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--eco-primary-dark);
+    white-space: nowrap; /* 防止价格换行 */
+    flex-shrink: 0; /* 防止被压缩 */
+}
+
+.show-box .info-item.date-text {
+    font-size: 13px;
+    color: #999;
+    text-align: left;
+    margin-top: 6px; /* 增加顶部间距 */
+    margin-bottom: 0;
+}
+
+.show-box .list .item:hover .info-item.title-text {
+    color: var(--eco-primary-dark);
+}
+
+.show-box .list .item:hover .price-value {
+    color: var(--eco-primary);
+}
+
+
+
+.news-box {
+    width: var(--body-width);
+    position: relative;
+    margin: 20px auto 0;
+    padding: 0px;
+    background: none!important;
+    order: 2;
+    animation-duration:1s;
+}
+
+.news-box .list {
+    background:#fff;
+    margin-top: 20px;
+    padding: 10px 0;
+    display: grid;
+    grid-template-areas:
+    'a1 a2 . ';
+    column-gap: 20px;
+    row-gap: 20px;
+}
+
+.news-box img {
+    width: 90px;
+    height: 100%;
+    flex-shrink: 0;
+    object-fit: cover;
+    margin-right: 16px;
+    border-radius: 4px;
+    display:block;
+}
+
+.news-box .list .item {
+    display: flex;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.news-box .list .item:first-child {
+}
+.news-box .list .item:first-child .info {
+}
+.news-box .item:first-child img {
+}
+.news-box .item:first-child .news-introduction {
+}
+.news-box .item:first-child .news-addTime {
+}
+
+.news-box .info {
+    display: flex;
+    flex-direction: column;
+    width: 0;
+    flex: 1;
+    box-sizing: border-box;
+}
+
+.news-box .info .news-title {
+    font-weight: 500;
+    font-size: 14px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    text-align: left;
+}
+.news-box .info .news-title:hover {
+    color: #27bacc;
+}
+
+
+.news-box .info .news-introduction {
+    line-height: 22px;
+    margin-top: 10px;
+    color: #666;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    text-align: left;
+    display:none;
+}
+
+.news-box .info .news-addTime {
+    margin-top: auto;
+    text-align: right;
+    color: #999;
+    font-size: 14px;
+    display:none;
+}
+.news-box {
+    position: relative;
+}
+
+.news-box .more{
+}
+.news-box .more::after {
+    font-family: 'element-icons';
+    content: '\E6E0';
+}
+
+/* 响应式设计 */
+@media (max-width: 1400px) {
+    .show-box .list {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 1024px) {
+    .show-box .list {
+        grid-template-columns: repeat(2, 1fr);
+        column-gap: 20px;
+        row-gap: 20px;
+    }
+    
+    .eco-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .eco-text {
+        text-align: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .show-box .list {
+        grid-template-columns: 1fr;
+        padding: 20px;
+    }
+    
+    .title-wrapper {
+        flex-wrap: wrap;
+        padding: 15px 20px 15px 20px;
+        padding-right: 20px; /* 移除右侧预留空间 */
+        min-height: auto;
+        gap: 10px;
+    }
+    
+    .title-icon {
+        font-size: 28px;
+    }
+    
+    .title {
+        font-size: 18px;
+    }
+    
+    .title-desc {
+        width: 100%;
+        margin-left: 0;
+        margin-right: 0;
+        margin-top: 8px;
+        max-width: 100%;
+        order: 3; /* 移到最下面 */
+    }
+    
+    .more {
+        position: static;
+        margin-top: 10px;
+        margin-left: auto; /* 靠右对齐 */
+        display: inline-flex;
+        transform: none; /* 移除垂直居中 */
+        right: auto;
+        top: auto;
+        order: 2; /* 在title-desc之前 */
+    }
+    
+    .more:hover {
+        transform: translateX(5px); /* 只保留水平移动 */
+    }
+    
+    .eco-banner {
+        padding: 20px;
+    }
+    
+    .eco-icon {
+        font-size: 36px;
+    }
+    
+    .eco-text h3 {
+        font-size: 20px;
+    }
+    
+    .eco-text p {
+        font-size: 14px;
+    }
+    
+    .page-swiper {
+        margin: 10px auto 20px;
+    }
+    
+    .swiper-wrapper .swiper-slide .item img {
+        height: 250px;
+    }
+}
+
+/* 中等屏幕优化 */
+@media (max-width: 1200px) and (min-width: 769px) {
+    .title-wrapper {
+        padding-right: 130px; /* 稍微减少预留空间 */
+    }
+    
+    .title-desc {
+        max-width: 150px; /* 限制描述文字宽度 */
+        font-size: 13px;
+    }
+}
+
+/* 空状态提示 */
+.show-box .list:empty::before {
+    content: '暂无数据';
+    display: block;
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+    font-size: 16px;
+}
+
+/* 加载动画优化 */
+.show-box .list .item {
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* 滚动条美化 */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--eco-bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--eco-primary);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--eco-primary-dark);
+}
+
+</style>
+</html>

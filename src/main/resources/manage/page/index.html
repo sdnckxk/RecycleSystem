@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>废旧物品回收系统</title>
+    <link rel="stylesheet" href="../static/modules/elementui/theme/index.css">
+    <link rel="stylesheet" href="../static/css/app.css">
+    <link rel="stylesheet" href="../static/css/index.css">
+    <link rel="stylesheet" href="../static/css/home.css">
+    <link rel="stylesheet" href="../static/css/admin-enhanced.css">
+    <link rel="stylesheet" href="../static/modules/animate.min.css">
+    <script src="../static/modules/wow.min.js"></script>
+    <script src="../static/modules/vue.min.js"></script>
+    <script src="../static/modules/elementui/index.js"></script>
+    <script src="../static/modules/echarts.min.js"></script>
+    <script src="../static/iconfont/iconfont.js"></script>
+</head>
+<body>
+<el-container id="page" v-cloak>
+    <el-header height="auto">
+        <page-header></page-header>
+    </el-header>
+    <el-container>
+    <page-aside>
+        <template v-slot:menu>
+            <page-menus></page-menus>
+        </template>
+    </page-aside>
+        <el-main>
+            <div id="child-page">
+                <!-- 欢迎横幅 -->
+                <div class="welcome-banner">
+                    <div class="banner-content">
+                        <div class="banner-icon">♻️</div>
+                        <div class="banner-text">
+                            <h2>废旧物品回收管理系统</h2>
+                            <p>绿色回收，数据驱动，共建环保家园</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 统计卡片 -->
+                <div class="count_list">
+                    <div class="count_item eco-card-1" v-if="btnAuth('jiuwuxinxi','首页总数')" @click="goToListPage('jiuwuxinxi')" title="点击进入旧物信息列表">
+                        <div class="item-head">
+                            <div class="item-icon">📦</div>
+                            <span class="item-head-title">旧物信息</span>
+                        </div>
+                        <div class="item-content">
+                            <div class="item_num">{{jiuwuxinxiCount}}</div>
+                            <div class="item_title">旧物信息总数</div>
+                        </div>
+                        <div class="item-footer">
+                            <iconfont icon="el-icon-arrow-right"></iconfont>
+                        </div>
+                    </div>
+                    <div class="count_item eco-card-2" v-if="btnAuth('huishoudingdan','首页总数')" @click="goToListPage('huishoudingdan')" title="点击进入回收订单列表">
+                        <div class="item-head">
+                            <div class="item-icon">📋</div>
+                            <span class="item-head-title">回收订单</span>
+                        </div>
+                        <div class="item-content">
+                            <div class="item_num">{{huishoudingdanCount}}</div>
+                            <div class="item_title">回收订单总数</div>
+                        </div>
+                        <div class="item-footer">
+                            <iconfont icon="el-icon-arrow-right"></iconfont>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 图表区域 -->
+                <div class="chart_list">
+                    <div class="chart_item" v-if="btnAuth('jiuwuxinxi','首页统计')">
+                        <div class="chart-header">
+                            <div class="chart-icon">📊</div>
+                            <div class="chart-title">旧物类型分布</div>
+                        </div>
+                        <div id="jiuwuxinxiEchart1" class="Echart"></div>
+                    </div>
+                    <div class="chart_item" v-if="btnAuth('huishoudingdan','首页统计')">
+                        <div class="chart-header">
+                            <div class="chart-icon">📈</div>
+                            <div class="chart-title">废品回收统计</div>
+                        </div>
+                        <div id="huishoudingdanEchart1" class="Echart"></div>
+                    </div>
+                </div>
+            </div>
+        </el-main>
+    </el-container>
+</el-container>
+</body>
+<script src="../static/modules/axios.min.js"></script>
+<script src="../utils/http.js"></script>
+<script src="../utils/toolUtil.js"></script>
+<script src="../utils/global_mixin.js"></script>
+<!--引入组件-->
+<script src="../components/pageHeader.js"></script>
+<script src="../components/pageMenus.js"></script>
+<script src="../components/pageAside.js"></script>
+<script>
+    var vm = new Vue({
+        el: '#page',
+        data(){
+            return {
+                jiuwuxinxiCount:0,
+                huishoudingdanCount:0,
+            }
+        },
+        mounted(){
+            this.getCountList()
+            this.getChartList()
+        },
+        methods: {
+            getCountList(){
+                if(this.btnAuth('jiuwuxinxi','首页总数')){
+                    this.getjiuwuxinxiCount()
+                }
+                if(this.btnAuth('huishoudingdan','首页总数')){
+                    this.gethuishoudingdanCount()
+                }
+            },
+            getjiuwuxinxiCount(){
+                http.get('jiuwuxinxi/count').then(res=>{
+                    this.jiuwuxinxiCount = res.data.data
+                })
+            },
+            gethuishoudingdanCount(){
+                http.get('huishoudingdan/count').then(res=>{
+                    this.huishoudingdanCount = res.data.data
+                })
+            },
+            //权限验证
+            btnAuth(e,a){
+                return toolUtil.isAuth(e,a)
+            },
+            // 统计卡片跳转（保持原功能不变，仅新增导航）
+            goToListPage(module){
+                const allowModules = ['jiuwuxinxi', 'huishoudingdan']
+                if(!allowModules.includes(module)) return
+                // manage/page/index.html -> manage/page/{module}/list.html
+                location.href = `./${module}/list.html`
+            },
+            getChartList(){
+                if(this.btnAuth('jiuwuxinxi','首页统计')){
+                    this.getjiuwuxinxiChart1()
+                }
+                if(this.btnAuth('huishoudingdan','首页统计')){
+                    this.gethuishoudingdanChart1()
+                }
+            },
+            getjiuwuxinxiChart1(){
+                this.$nextTick(()=>{
+                    var jiuwuxinxiEchart1 = echarts.init(document.getElementById("jiuwuxinxiEchart1"),'macarons');
+                    http.get(
+                        "jiuwuxinxi/group/jiuwufenlei"
+                    ).then(res=>{
+                        let obj = res.data.data
+                        let xAxis = [];
+                        let yAxis = [];
+                        let pArray = []
+                        for(let i=0;i<obj.length;i++){
+                            xAxis.push(obj[i].jiuwufenlei);
+                            yAxis.push(parseFloat((obj[i].total)));
+                            pArray.push({
+                                value: parseFloat((obj[i].total)),
+                                name: obj[i].jiuwufenlei
+                            })
+                        }
+                        // 环保主题配色
+                        const ecoColors = ['#4CAF50', '#66BB6A', '#81C784', '#A5D6A7', '#C8E6C9', '#2E7D32', '#1B5E20', '#388E3C'];
+                        
+                        let option = {};
+                        option = {
+                            color: ecoColors,
+                            title: {
+                                text: '旧物类型分布',
+                                left: 'center',
+                                textStyle: {
+                                    color: '#2E7D32',
+                                    fontSize: 18,
+                                    fontWeight: 600
+                                }
+                            },
+                            legend: {
+                                orient: 'vertical',
+                                left: 'left',
+                                textStyle: {
+                                    color: '#666'
+                                }
+                            },
+                            tooltip: {
+                                trigger: 'item',
+                                formatter: '{b} : {c} ({d}%)',
+                                backgroundColor: 'rgba(46, 125, 50, 0.9)',
+                                borderColor: '#4CAF50',
+                                textStyle: {
+                                    color: '#fff'
+                                }
+                            },
+                            series: [
+                                {
+                                    type: 'pie',
+                                    radius: ['40%', '70%'],
+                                    center: ['50%', '60%'],
+                                    data: pArray,
+                                    itemStyle: {
+                                        borderRadius: 8,
+                                        borderColor: '#fff',
+                                        borderWidth: 2
+                                    },
+                                    emphasis: {
+                                        itemStyle: {
+                                            shadowBlur: 15,
+                                            shadowOffsetX: 0,
+                                            shadowColor: 'rgba(76, 175, 80, 0.5)'
+                                        },
+                                        label: {
+                                            fontSize: 14,
+                                            fontWeight: 'bold'
+                                        }
+                                    },
+                                    label: {
+                                        show: true,
+                                        formatter: '{b}\n{d}%'
+                                    }
+                                }
+                            ]
+                        };
+                        // 使用刚指定的配置项和数据显示图表。
+                        jiuwuxinxiEchart1.setOption(option);
+                        //根据窗口的大小变动图表
+                        window.onresize = function() {
+                            jiuwuxinxiEchart1.resize();
+                        };
+                    })
+                })
+            },
+            gethuishoudingdanChart1(){
+                this.$nextTick(()=>{
+                    var huishoudingdanEchart1 = echarts.init(document.getElementById("huishoudingdanEchart1"),'macarons');
+                    http.get(
+                        `huishoudingdan/value/jiuwufenlei/huishoushuliang`
+                    ).then(res=>{
+                        let obj = res.data.data
+                        let xAxis = [];
+                        let yAxis = [];
+                        let pArray = []
+                        for(let i=0;i<obj.length;i++){
+                            xAxis.push(obj[i].jiuwufenlei);
+                            yAxis.push(parseFloat((obj[i].total)));
+                            pArray.push({
+                                value: parseFloat((obj[i].total)),
+                                name: obj[i].jiuwufenlei
+                            })
+                        }
+                        // 环保主题配色
+                        const ecoBarColors = ['#4CAF50', '#66BB6A', '#81C784', '#A5D6A7', '#C8E6C9'];
+                        
+                        let option = {};
+                        option = {
+                            color: ecoBarColors,
+                            title: {
+                                text: '废品回收统计',
+                                left: 'center',
+                                textStyle: {
+                                    color: '#2E7D32',
+                                    fontSize: 18,
+                                    fontWeight: 600
+                                }
+                            },
+                            grid: {
+                                containLabel: true,
+                                left: '10%',
+                                right: '10%',
+                                bottom: '15%',
+                                top: '15%'
+                            },
+                            tooltip: {
+                                trigger: 'axis',
+                                formatter: '{b} : {c}',
+                                backgroundColor: 'rgba(46, 125, 50, 0.9)',
+                                borderColor: '#4CAF50',
+                                textStyle: {
+                                    color: '#fff'
+                                }
+                            },
+                            xAxis: {
+                                type: 'category',
+                                data: xAxis,
+                                axisLabel: {
+                                    rotate: 40,
+                                    color: '#666'
+                                },
+                                axisLine: {
+                                    lineStyle: {
+                                        color: '#C8E6C9'
+                                    }
+                                }
+                            },
+                            yAxis: {
+                                type: 'value',
+                                axisLabel: {
+                                    color: '#666'
+                                },
+                                axisLine: {
+                                    lineStyle: {
+                                        color: '#C8E6C9'
+                                    }
+                                },
+                                splitLine: {
+                                    lineStyle: {
+                                        color: '#E8F5E9',
+                                        type: 'dashed'
+                                    }
+                                }
+                            },
+                            series: [{
+                                data: yAxis,
+                                type: 'bar',
+                                barWidth: '60%',
+                                itemStyle: {
+                                    borderRadius: [8, 8, 0, 0],
+                                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                        { offset: 0, color: '#66BB6A' },
+                                        { offset: 1, color: '#4CAF50' }
+                                    ])
+                                },
+                                emphasis: {
+                                    itemStyle: {
+                                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                            { offset: 0, color: '#81C784' },
+                                            { offset: 1, color: '#2E7D32' }
+                                        ])
+                                    }
+                                },
+                                label: {
+                                    show: true,
+                                    position: 'top',
+                                    color: '#2E7D32',
+                                    fontWeight: 'bold'
+                                }
+                            }]
+                        };
+                        // 使用刚指定的配置项和数据显示图表。
+                        huishoudingdanEchart1.setOption(option);
+                        //根据窗口的大小变动图表
+                        window.onresize = function() {
+                            huishoudingdanEchart1.resize();
+                        };
+                    })
+                })
+            },
+        }
+    })
+</script>
+</html>
